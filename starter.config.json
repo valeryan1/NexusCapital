@@ -1,0 +1,8 @@
+{
+  "id": "nexuscapital",
+  "name": "NexusCapital",
+  "description": "AI-Powered Institutional Research Platform.",
+  "baseVersion": "0.1.0",
+  "framework": "tanstack-start",
+  "database": "postgresql"
+}

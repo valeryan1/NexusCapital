@@ -1,0 +1,133 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--card);
+  --color-popover-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--border);
+  --color-ring: var(--primary);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: Inter, Roboto, Arial, Helvetica, sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  /* Custom UI colors */
+  --color-brand-500: #FF7A00;
+  --color-brand-400: #FFA64D;
+  --color-brand-900: #4a2500;
+  --color-dark-950: #09090B;
+  --color-dark-900: #18181B;
+  --color-dark-800: #27272A;
+  --color-dark-700: #3F3F46;
+  --color-semantic-bull: #10B981;
+  --color-semantic-bear: #F43F5E;
+  --color-semantic-info: #3B82F6;
+
+  /* Custom animations */
+  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-glow: glow 2s ease-in-out infinite alternate;
+  --animate-fade-in: fadeIn 0.3s ease-in-out;
+
+  @keyframes glow {
+    0% { box-shadow: 0 0 5px rgba(255, 122, 0, 0.2); }
+    100% { box-shadow: 0 0 20px rgba(255, 122, 0, 0.6); }
+  }
+  @keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+}
+
+:root {
+  /* Force Dark Theme as Default for Industrial Look */
+  --radius: 0.5rem; /* Slightly sharper corners for industrial feel */
+  --background: #09090B; /* dark-950 */
+  --foreground: #FFFFFF;
+  --card: #18181B; /* dark-900 */
+  --card-foreground: #FFFFFF;
+  --primary: #FF7A00;
+  --primary-foreground: #FFFFFF;
+  --secondary: #27272A; /* dark-800 */
+  --muted: #27272A;
+  --muted-foreground: #A1A1AA;
+  --accent: #FFA64D;
+  --accent-foreground: #09090B;
+  --border: #3F3F46; /* dark-700 */
+  --destructive: #F43F5E; /* semantic-bear */
+}
+
+.dark {
+  /* Keep it identical since we want it dark by default */
+  --background: #09090B;
+  --foreground: #FFFFFF;
+  --card: #18181B;
+  --card-foreground: #FFFFFF;
+  --primary: #FF7A00;
+  --primary-foreground: #FFFFFF;
+  --secondary: #27272A;
+  --muted: #27272A;
+  --muted-foreground: #A1A1AA;
+  --accent: #FFA64D;
+  --accent-foreground: #09090B;
+  --border: #3F3F46;
+  --destructive: #F43F5E;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+  button,
+  a,
+  input,
+  textarea,
+  select {
+    -webkit-tap-highlight-color: transparent;
+  }
+  button:not(:disabled),
+  a {
+    cursor: pointer;
+  }
+  ::selection {
+    @apply bg-brand-500 text-white;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--color-dark-950); }
+  ::-webkit-scrollbar-thumb { background: var(--color-dark-800); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-brand-500); }
+}
+
+@layer utilities {
+  .bg-grid-pattern {
+    background-image: linear-gradient(to right, var(--color-dark-800) 1px, transparent 1px), linear-gradient(to bottom, var(--color-dark-800) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .glass {
+    background: rgba(24, 24, 27, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}
