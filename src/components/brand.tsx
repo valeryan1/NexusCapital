@@ -2,22 +2,19 @@ import { Link } from "@tanstack/react-router";
 import { siteConfig } from "@/config/site";
 
 export function Brand({ collapsed = false }: { collapsed?: boolean }) {
-  // Jika sidebar dikecilkan (collapsed), kita tampilkan logo dalam bentuk yang terpotong rapi (sebelah kiri/tengah)
-  // atau cukup perbesar ruangnya di dalam sidebar kecil agar tidak sekecil debu.
   return (
     <Link
       to="/"
-      className="flex items-center justify-center w-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring group px-2"
+      className={`inline-flex items-center gap-3 rounded-sm tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring group ${collapsed ? 'justify-center w-full' : ''}`}
       aria-label={`${siteConfig.name} home`}
     >
-      {collapsed ? (
-        <div className="flex items-center justify-center w-16 h-16 transition-all duration-300 rounded-lg overflow-hidden bg-white/5 border border-white/10">
-          <img src="/logo.png" alt="Logo" className="w-full h-full object-cover object-center drop-shadow-md" />
-        </div>
-      ) : (
-        <div className="flex items-center justify-center w-[200px] h-[60px] transition-all duration-300">
-          <img src="/logo.png" alt="Logo" className="w-full h-full object-contain drop-shadow-md group-hover:drop-shadow-lg transition-all" />
-        </div>
+      <div className={`flex shrink-0 items-center justify-center transition-all duration-300 ${collapsed ? 'w-12 h-12' : 'w-14 h-14'}`}>
+        <img src="/logo.png" alt="Logo" className="w-full h-full object-contain drop-shadow-md group-hover:drop-shadow-lg group-hover:scale-105 transition-all" />
+      </div>
+      {!collapsed && (
+        <span className="text-xl font-bold text-white tracking-tight animate-fade-in">
+          Nexus<span className="text-brand-500">Capital</span>
+        </span>
       )}
     </Link>
   );
