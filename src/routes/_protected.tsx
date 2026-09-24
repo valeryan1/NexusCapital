@@ -12,7 +12,10 @@ import {
   Bell,
   MoreVertical,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Calculator,
+  User,
+  LogOut
 } from "lucide-react";
 import { cn } from "cn";
 import { Brand } from "@/components/brand";
@@ -28,6 +31,7 @@ export const Route = createFileRoute("/_protected")({
 const navItemsWorkspace = [
   { id: "overview", label: "Overview", icon: PieChart, path: "/app" },
   { id: "research", label: "Research Studio", icon: Bot, path: "/research" },
+  { id: "valuation", label: "Valuation Screener", icon: Calculator, path: "/valuation" },
   { id: "alerts", label: "Micro-Alerts", icon: Zap, path: "/alerts", badge: "3" },
 ];
 
@@ -42,6 +46,7 @@ function ProtectedLayout() {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
   return (
     <div className="flex h-screen overflow-hidden bg-background text-gray-300 font-sans antialiased selection:bg-brand-500 selection:text-white">
@@ -126,27 +131,55 @@ function ProtectedLayout() {
         {/* User Profile Bottom */}
         <div className="p-3 border-t border-dark-800 bg-dark-900">
           <div className="flex flex-col gap-2 relative">
-            <div className={cn(
-              "flex items-center p-2 rounded-lg hover:bg-dark-800 transition-colors cursor-pointer border border-transparent hover:border-dark-700 group",
-              isCollapsed ? "justify-center" : "gap-3"
-            )}>
-              <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=27272A&color=FF7A00&bold=true`} alt="User" className="w-8 h-8 rounded-full border border-dark-700 shrink-0" />
+            <div 
+              className={cn(
+                "flex items-center p-2 rounded-lg hover:bg-dark-800 transition-colors cursor-pointer border border-transparent hover:border-dark-700 group",
+                isCollapsed ? "justify-center" : "gap-3"
+              )}
+              onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+            >
+              <img src={user.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=27272A&color=FF7A00&bold=true`} alt="User" className="w-8 h-8 rounded-full border border-dark-700 shrink-0 object-cover" />
               {!isCollapsed && (
                 <>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-white truncate">{user.name}</p>
                     <p className="text-[10px] text-brand-500 truncate uppercase tracking-wider font-bold">Institutional Pro</p>
                   </div>
-                  <MoreVertical className="text-gray-500 size-4" />
+                  <MoreVertical className="text-gray-500 size-4 group-hover:text-white transition-colors" />
                 </>
               )}
             </div>
-            {!isCollapsed ? (
-              <SignOutButton />
-            ) : (
-              <div className="w-full flex justify-center">
-                <SignOutButton collapsed={true} />
-              </div>
+
+            {/* Profile Dropdown Menu */}
+            {profileMenuOpen && (
+              <>
+                <div 
+                  className="fixed inset-0 z-40" 
+                  onClick={() => setProfileMenuOpen(false)}
+                />
+                <div className={cn(
+                  "absolute z-50 bottom-full mb-2 bg-dark-900 border border-dark-800 rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-bottom-2",
+                  isCollapsed ? "left-full ml-2 w-48" : "left-0 w-full"
+                )}>
+                  <div className="px-3 py-2 border-b border-dark-800">
+                    <p className="text-sm font-medium text-white truncate">{user.name}</p>
+                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                  </div>
+                  <div className="p-1">
+                    <Link to="/settings" className="flex items-center gap-2 px-2 py-1.5 text-sm text-gray-300 hover:text-white hover:bg-dark-800 rounded-md transition-colors" onClick={() => setProfileMenuOpen(false)}>
+                      <User className="size-4" />
+                      Edit Profile
+                    </Link>
+                    <Link to="/settings" className="flex items-center gap-2 px-2 py-1.5 text-sm text-gray-300 hover:text-white hover:bg-dark-800 rounded-md transition-colors" onClick={() => setProfileMenuOpen(false)}>
+                      <Settings className="size-4" />
+                      Preferences
+                    </Link>
+                  </div>
+                  <div className="p-1 border-t border-dark-800">
+                    <SignOutButton className="w-full justify-start text-sm px-2 py-1.5 text-red-400 hover:text-red-300 hover:bg-red-400/10 h-auto font-normal rounded-md" />
+                  </div>
+                </div>
+              </>
             )}
           </div>
         </div>

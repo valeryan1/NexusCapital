@@ -3,7 +3,7 @@ import { useNavigate, useRouter } from "@tanstack/react-router";
 import { LogOut } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 
-export function SignOutButton({ collapsed = false }: { collapsed?: boolean }) {
+export function SignOutButton({ collapsed = false, className }: { collapsed?: boolean, className?: string }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState(false);
   const router = useRouter();
@@ -32,7 +32,7 @@ export function SignOutButton({ collapsed = false }: { collapsed?: boolean }) {
       <button 
         onClick={signOut} 
         disabled={pending} 
-        className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-lg border border-dark-700 bg-dark-950 text-gray-400 hover:text-white hover:bg-dark-800 transition-colors disabled:opacity-50"
+        className={className || "flex items-center justify-center gap-2 w-full py-2 px-3 rounded-lg border border-dark-700 bg-dark-950 text-gray-400 hover:text-white hover:bg-dark-800 transition-colors disabled:opacity-50"}
         title="Sign out"
       >
         <LogOut className="size-4 shrink-0" aria-hidden="true" />

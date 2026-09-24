@@ -11,6 +11,14 @@ import { ac, ADMIN_ROLES, DEFAULT_ROLE, roles } from "@/lib/permissions";
 export const auth = betterAuth({
   appName: siteConfig.name,
   baseURL: env.BETTER_AUTH_URL,
+  trustedOrigins: [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3001",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173"
+  ],
   secret: env.BETTER_AUTH_SECRET,
   database: drizzleAdapter(db, { provider: "pg", schema }),
   advanced: { cookiePrefix: `ngodingpakeai-${siteConfig.id}` },

@@ -21,6 +21,7 @@ import { Route as ProtectedAppRouteImport } from './routes/_protected/app'
 import { Route as ProtectedBillingRouteImport } from './routes/_protected/billing'
 import { Route as ProtectedResearchRouteImport } from './routes/_protected/research'
 import { Route as ProtectedSettingsRouteImport } from './routes/_protected/settings'
+import { Route as ProtectedValuationRouteImport } from './routes/_protected/valuation'
 import { Route as ProtectedReportIdRouteImport } from './routes/_protected/report/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiNotesIndexRouteImport } from './routes/api/notes/index'
@@ -86,6 +87,11 @@ const ProtectedSettingsRoute = ProtectedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => ProtectedRoute,
 } as any)
+const ProtectedValuationRoute = ProtectedValuationRouteImport.update({
+  id: '/valuation',
+  path: '/valuation',
+  getParentRoute: () => ProtectedRoute,
+} as any)
 const ProtectedReportIdRoute = ProtectedReportIdRouteImport.update({
   id: '/report/$id',
   path: '/report/$id',
@@ -128,6 +134,7 @@ export interface FileRoutesByFullPath {
   '/billing': typeof ProtectedBillingRoute
   '/research': typeof ProtectedResearchRoute
   '/settings': typeof ProtectedSettingsRoute
+  '/valuation': typeof ProtectedValuationRoute
   '/report/$id': typeof ProtectedReportIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
@@ -146,6 +153,7 @@ export interface FileRoutesByTo {
   '/billing': typeof ProtectedBillingRoute
   '/research': typeof ProtectedResearchRoute
   '/settings': typeof ProtectedSettingsRoute
+  '/valuation': typeof ProtectedValuationRoute
   '/report/$id': typeof ProtectedReportIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
@@ -167,6 +175,7 @@ export interface FileRoutesById {
   '/_protected/billing': typeof ProtectedBillingRoute
   '/_protected/research': typeof ProtectedResearchRoute
   '/_protected/settings': typeof ProtectedSettingsRoute
+  '/_protected/valuation': typeof ProtectedValuationRoute
   '/_protected/report/$id': typeof ProtectedReportIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
@@ -187,6 +196,7 @@ export interface FileRouteTypes {
     | '/billing'
     | '/research'
     | '/settings'
+    | '/valuation'
     | '/report/$id'
     | '/api/auth/$'
     | '/api/notes/$id'
@@ -205,6 +215,7 @@ export interface FileRouteTypes {
     | '/billing'
     | '/research'
     | '/settings'
+    | '/valuation'
     | '/report/$id'
     | '/api/auth/$'
     | '/api/notes/$id'
@@ -225,6 +236,7 @@ export interface FileRouteTypes {
     | '/_protected/billing'
     | '/_protected/research'
     | '/_protected/settings'
+    | '/_protected/valuation'
     | '/_protected/report/$id'
     | '/api/auth/$'
     | '/api/notes/$id'
@@ -330,6 +342,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedSettingsRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/valuation': {
+      id: '/_protected/valuation'
+      path: '/valuation'
+      fullPath: '/valuation'
+      preLoaderRoute: typeof ProtectedValuationRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
     '/_protected/report/$id': {
       id: '/_protected/report/$id'
       path: '/report/$id'
@@ -395,6 +414,7 @@ interface ProtectedRouteChildren {
   ProtectedBillingRoute: typeof ProtectedBillingRoute
   ProtectedResearchRoute: typeof ProtectedResearchRoute
   ProtectedSettingsRoute: typeof ProtectedSettingsRoute
+  ProtectedValuationRoute: typeof ProtectedValuationRoute
   ProtectedReportIdRoute: typeof ProtectedReportIdRoute
 }
 
@@ -406,6 +426,7 @@ const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedBillingRoute: ProtectedBillingRoute,
   ProtectedResearchRoute: ProtectedResearchRoute,
   ProtectedSettingsRoute: ProtectedSettingsRoute,
+  ProtectedValuationRoute: ProtectedValuationRoute,
   ProtectedReportIdRoute: ProtectedReportIdRoute,
 }
 

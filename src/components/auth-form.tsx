@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useRouter } from "@tanstack/react-router";
-import { ArrowRight, LoaderCircle } from "lucide-react";
+import { ArrowRight, LoaderCircle, Eye, EyeOff } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { siteConfig } from "@/config/site";
 
@@ -10,17 +10,33 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
   const navigate = useNavigate();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (pending) return;
     const data = new FormData(event.currentTarget);
+    
+    const password = String(data.get("password"));
+    if (signingUp) {
+      if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,}/.test(password)) {
+        setError("Kata sandi harus memiliki minimal 8 karakter, huruf besar, huruf kecil, dan karakter unik/spesial.");
+        return;
+      }
+      const confirmPassword = String(data.get("confirmPassword"));
+      if (password !== confirmPassword) {
+        setError("Kata sandi dan Konfirmasi Kata Sandi tidak cocok.");
+        return;
+      }
+    }
+
     setPending(true);
     setError("");
     try {
       const credentials = {
         email: String(data.get("email")).trim(),
-        password: String(data.get("password")),
+        password,
       };
       const result = signingUp
         ? await authClient.signUp.email({
@@ -105,23 +121,60 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
             <div className="flex justify-between items-center">
               <label htmlFor="password" className="text-xs font-medium text-gray-400">Password</label>
             </div>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete={signingUp ? "new-password" : "current-password"}
-              required
-              minLength={8}
-              maxLength={128}
-              aria-describedby={signingUp ? "password-hint" : undefined}
-              className="w-full bg-dark-950 border border-dark-700 rounded-lg px-4 py-2.5 text-sm text-white focus:border-brand-500 focus:ring-1 focus:ring-brand-500 focus:outline-none transition-all placeholder:text-dark-700 font-mono tracking-widest"
-            />
+            <div className="relative">
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                autoComplete={signingUp ? "new-password" : "current-password"}
+                required
+                minLength={8}
+                maxLength={128}
+                aria-describedby={signingUp ? "password-hint" : undefined}
+                className="w-full bg-dark-950 border border-dark-700 rounded-lg px-4 py-2.5 text-sm text-white focus:border-brand-500 focus:ring-1 focus:ring-brand-500 focus:outline-none transition-all placeholder:text-dark-700 font-mono tracking-widest pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-white"
+                aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
+              >
+                {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+              </button>
+            </div>
             {signingUp && (
-              <p id="password-hint" className="text-xs text-gray-500 mt-1">
-                Use at least 8 characters.
+              <p id="password-hint" className="text-xs text-brand-500 mt-1">
+                * Ketentuan: Kata sandi minimal harus 8 karakter, mengandung huruf besar, huruf kecil, dan karakter unik.
               </p>
             )}
           </div>
+          
+          {signingUp && (
+            <div className="space-y-1.5">
+              <label htmlFor="confirmPassword" className="text-xs font-medium text-gray-400">Confirm Password</label>
+              <div className="relative">
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  required
+                  minLength={8}
+                  maxLength={128}
+                  className="w-full bg-dark-950 border border-dark-700 rounded-lg px-4 py-2.5 text-sm text-white focus:border-brand-500 focus:ring-1 focus:ring-brand-500 focus:outline-none transition-all placeholder:text-dark-700 font-mono tracking-widest pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-white"
+                  aria-label={showConfirmPassword ? "Sembunyikan konfirmasi kata sandi" : "Tampilkan konfirmasi kata sandi"}
+                >
+                  {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
+              </div>
+            </div>
+          )}
+
           {error && (
             <p
               id="auth-error"
