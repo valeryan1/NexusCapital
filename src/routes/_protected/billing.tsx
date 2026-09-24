@@ -70,7 +70,7 @@ function BillingPage() {
   const [selected, setSelected] = useState<PackageId>("pro");
 
   return (
-    <div className="view-section animate-fade-in max-w-5xl mx-auto space-y-10 py-8">
+    <div className="view-section animate-fade-in max-w-5xl mx-auto space-y-8 pt-2 pb-8">
       {/* Header */}
       <div className="text-center space-y-3">
         <h2 className="text-3xl font-bold text-white">Upgrade your plan</h2>
