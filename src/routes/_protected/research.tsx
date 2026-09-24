@@ -14,7 +14,7 @@ import {
   AlertTriangle,
   Info
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { 
   LineChart, 
   Line, 
@@ -101,7 +101,143 @@ const SentimentBadge = ({ sentiment }: { sentiment: string }) => {
 
 function ResearchStudio() {
   const [tickerInput, setTickerInput] = useState("BBCA");
-  const data = mockResearchData; // Wire this to state/fetch later
+  const [researchData, setResearchData] = useState<any>(mockResearchData);
+  const [isLoading, setIsLoading] = useState(false);
+  const cache = useRef<Record<string, any>>({});
+
+  const fetchCompanyData = async (ticker: string) => {
+    if (!ticker) return;
+    const cacheKey = ticker.toUpperCase().replace(".JK", "");
+
+    if (cache.current[cacheKey]) {
+      setResearchData(cache.current[cacheKey]);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const screenerQuery = `symbol='${cacheKey}.JK' and (pe_ttm > -9999 or pe_ttm is null) and (pb_mrq > -9999 or pb_mrq is null) and (roe_ttm > -9999 or roe_ttm is null) and (der_mrq > -9999 or der_mrq is null) and (yield_ttm >= 0 or yield_ttm is null)`;
+
+      const [reportResponse, newsResponse, screenerResponse] = await Promise.all([
+        fetch(`https://api.sectors.app/v2/company/report/${cacheKey}.JK/?sections=overview,valuation,financials,dividend,ownership`, {
+          headers: { Authorization: "ced24817315a288d530ac3dc65a2d871d86420ea14dcac64b5e8348319d0119b" }
+        }),
+        fetch(`https://api.sectors.app/v2/news/?extension=idx&symbols=${cacheKey}&limit=5`, {
+          headers: { Authorization: "ced24817315a288d530ac3dc65a2d871d86420ea14dcac64b5e8348319d0119b" }
+        }),
+        // Sebagai ganti financials, kita panggil screener endpoint yang payloadnya sangat kecil (hanya sekian byte)
+        fetch(`https://api.sectors.app/v2/companies/?where=${encodeURIComponent(screenerQuery)}&include_query_values=true`, {
+          headers: { Authorization: "ced24817315a288d530ac3dc65a2d871d86420ea14dcac64b5e8348319d0119b" }
+        })
+      ]);
+      
+      if (!reportResponse.ok) throw new Error("Failed to fetch report");
+      
+      const res = await reportResponse.json();
+      const newsData = newsResponse.ok ? await newsResponse.json() : { results: [] };
+      const screenerData = screenerResponse.ok ? await screenerResponse.json() : { results: [] };
+
+      const historicalEpsObj = res.financials?.historical_eps || {};
+      const epsYears = Object.keys(historicalEpsObj).sort();
+      const epsDataWithGrowth = epsYears
+        .map(year => ({ year, ...historicalEpsObj[year] }))
+        .filter((item: any) => item.eps_growth !== undefined && item.eps_growth !== null)
+        .slice(-2);
+        
+      let earningsHistory = mockResearchData.earnings.history;
+      if (epsDataWithGrowth.length > 0) {
+        earningsHistory = epsDataWithGrowth.reverse().map((item: any) => {
+          const growth = item.eps_growth;
+          return {
+            quarter: "FY " + item.year,
+            type: growth > 0 ? "Growth" : "Decline",
+            surprisePct: (growth > 0 ? "+" : "") + (growth * 100).toFixed(1) + "%"
+          };
+        });
+      }
+
+      const metrics = screenerData.results?.[0]?.query_values || {};
+      const top3Shareholders = res.ownership?.major_shareholders?.slice(0, 3) || [];
+      const colors = ["#FF7A00", "#3B82F6", "#10B981"];
+
+      const mappedNews = (newsData.results || []).slice(0, 5).map((n: any, i: number) => {
+        const d = new Date(n.timestamp);
+        const dateStr = d.toLocaleDateString("id-ID", { month: "short", day: "numeric", year: "numeric" });
+        
+        let sentiment = "Neutral";
+        if (n.tags?.includes("Bullish")) sentiment = "Bullish";
+        if (n.tags?.includes("Bearish")) sentiment = "Bearish";
+        
+        // Pilih tag selain sentiment jika ada, fallback ke "News"
+        const tag = n.tags?.find((t: string) => t !== "Bullish" && t !== "Bearish") || "News";
+
+        return {
+          id: i,
+          date: dateStr,
+          headline: n.title,
+          sentiment: sentiment,
+          tag: tag
+        };
+      });
+
+      const mappedData = {
+        ...mockResearchData,
+        ticker: cacheKey,
+        companyName: res.company_name || cacheKey,
+        sector: res.overview?.sector || "-",
+        currentPrice: res.overview?.last_close_price || 0,
+        priceChange: res.overview?.daily_close_change ? (res.overview.daily_close_change > 0 ? "+" : "") + (res.overview.daily_close_change * 100).toFixed(2) + "%" : "0%",
+        valuation: {
+          ...mockResearchData.valuation,
+          per: { ...mockResearchData.valuation.per, value: metrics.pe_ttm ? Number(metrics.pe_ttm.toFixed(2)) : 0 },
+          pbv: { ...mockResearchData.valuation.pbv, value: metrics.pb_mrq ? Number(metrics.pb_mrq.toFixed(2)) : 0 },
+          roe: { ...mockResearchData.valuation.roe, value: metrics.roe_ttm ? Number((metrics.roe_ttm * 100).toFixed(2)) : 0 },
+          divYield: { ...mockResearchData.valuation.divYield, value: metrics.yield_ttm ? Number((metrics.yield_ttm * 100).toFixed(2)) : 0 },
+          der: { ...mockResearchData.valuation.der, value: metrics.der_mrq ? Number(metrics.der_mrq.toFixed(2)) : 0 },
+        },
+        historicalBands: res.valuation?.historical_valuation?.map((item: any) => ({
+          year: String(item.year),
+          per: Number(item.pe?.toFixed(2) || 0),
+          pbv: Number(item.pb?.toFixed(2) || 0)
+        })) || [],
+        earnings: {
+          nextRelease: "TBA (Check IDX)",
+          daysLeft: 0,
+          history: earningsHistory
+        },
+        ownership: {
+          data: top3Shareholders.map((sh: any, index: number) => ({
+            name: sh.name,
+            value: Number((Number(sh.share_percentage) * 100).toFixed(2)),
+            color: colors[index % colors.length]
+          })),
+          summary: `Top shareholder is ${top3Shareholders[0]?.name || "-"} with ${(Number(top3Shareholders[0]?.share_percentage || 0) * 100).toFixed(1)}% ownership.`
+        },
+        news: mappedNews.length > 0 ? mappedNews : [
+          { id: 99, date: "Hari ini", headline: `Tidak ada berita terbaru untuk ${cacheKey} saat ini.`, sentiment: "Neutral", tag: "Info" }
+        ]
+      };
+
+      cache.current[cacheKey] = mappedData;
+      setResearchData(mappedData);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCompanyData("BBCA");
+  }, []);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      fetchCompanyData(tickerInput);
+    }
+  };
+
+  const data = researchData;
 
   return (
     <div className="view-section animate-fade-in max-w-7xl mx-auto space-y-6 pb-12">
@@ -120,9 +256,15 @@ function ResearchStudio() {
             type="text" 
             value={tickerInput}
             onChange={(e) => setTickerInput(e.target.value.toUpperCase())}
+            onKeyDown={handleKeyDown}
             placeholder="Search Ticker..." 
-            className="w-full bg-dark-950 border border-dark-700 rounded-lg pl-9 pr-4 py-2 text-white placeholder-gray-600 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 uppercase font-bold" 
+            className="w-full bg-dark-950 border border-dark-700 rounded-lg pl-9 pr-10 py-2 text-white placeholder-gray-600 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 uppercase font-bold" 
           />
+          {isLoading && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <div className="w-4 h-4 border-2 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -221,7 +363,7 @@ function ResearchStudio() {
               Latest Contextual News
             </h3>
             <div className="space-y-3">
-              {data.news.map((item) => (
+              {data.news.map((item: any) => (
                 <div key={item.id} className="group p-3 border border-dark-800 rounded-lg hover:bg-dark-800/50 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-dark-950/50">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
@@ -260,16 +402,16 @@ function ResearchStudio() {
             </div>
             
             <div>
-              <h4 className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-2">Recent EPS Surprise</h4>
+              <h4 className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-2">Recent EPS Growth (FY)</h4>
               <div className="space-y-2">
-                {data.earnings.history.map((hist, idx) => (
+                {data.earnings.history.map((hist: any, idx: number) => (
                   <div key={idx} className="flex items-center justify-between p-2.5 bg-dark-950 border border-dark-800 rounded-lg">
                     <span className="text-sm font-medium text-gray-300">{hist.quarter}</span>
                     <div className="flex items-center gap-2">
-                      <span className={`text-xs font-bold px-2 py-0.5 rounded ${hist.type === 'Beat' ? 'bg-semantic-bull/10 text-semantic-bull border border-semantic-bull/20' : 'bg-semantic-bear/10 text-semantic-bear border border-semantic-bear/20'}`}>
+                      <span className={`text-xs font-bold px-2 py-0.5 rounded ${hist.type === 'Growth' ? 'bg-semantic-bull/10 text-semantic-bull border border-semantic-bull/20' : 'bg-semantic-bear/10 text-semantic-bear border border-semantic-bear/20'}`}>
                         {hist.type}
                       </span>
-                      <span className={`text-sm font-bold ${hist.type === 'Beat' ? 'text-semantic-bull' : 'text-semantic-bear'}`}>
+                      <span className={`text-sm font-bold ${hist.type === 'Growth' ? 'text-semantic-bull' : 'text-semantic-bear'}`}>
                         {hist.surprisePct}
                       </span>
                     </div>
@@ -300,7 +442,7 @@ function ResearchStudio() {
                       dataKey="value"
                       stroke="none"
                     >
-                      {data.ownership.data.map((entry, index) => (
+                      {data.ownership.data.map((entry: any, index: number) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
@@ -314,7 +456,7 @@ function ResearchStudio() {
             </div>
 
             <div className="space-y-2 mb-5">
-              {data.ownership.data.map((item, idx) => (
+              {data.ownership.data.map((item: any, idx: number) => (
                 <div key={idx} className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2">
                     <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }}></div>

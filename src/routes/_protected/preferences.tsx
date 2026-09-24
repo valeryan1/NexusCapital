@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { siteConfig } from "@/config/site";
-import { Settings2, Moon, Sun, Monitor, Bell, Image } from "lucide-react";
+import { Settings2, Moon, Sun, Monitor, Bell, Image, CheckCircle2 } from "lucide-react";
 import { useState, useEffect } from "react";
 
 export const Route = createFileRoute("/_protected/preferences")({
@@ -13,6 +13,16 @@ function PreferencesPage() {
     return (localStorage.getItem("theme") as "system" | "dark" | "light") || "dark";
   });
   const [emailAlerts, setEmailAlerts] = useState(true);
+  const [showToast, setShowToast] = useState(false);
+
+  const toggleEmailAlerts = () => {
+    const newState = !emailAlerts;
+    setEmailAlerts(newState);
+    if (newState) {
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    }
+  };
 
   const applyTheme = (newTheme: "system" | "dark" | "light") => {
     const root = window.document.documentElement;
@@ -106,7 +116,7 @@ function PreferencesPage() {
               <p className="text-xs text-gray-500 max-w-md">Receive breaking news and critical corporate actions for your watchlist directly to your inbox.</p>
             </div>
             <button 
-              onClick={() => setEmailAlerts(!emailAlerts)}
+              onClick={toggleEmailAlerts}
               className={`w-12 h-6 rounded-full transition-colors relative flex-shrink-0 ${emailAlerts ? 'bg-brand-500' : 'bg-dark-700'}`}
             >
               <span className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform ${emailAlerts ? 'translate-x-6' : 'translate-x-0'}`} />
@@ -154,6 +164,17 @@ function PreferencesPage() {
         </div>
 
       </div>
+
+      {/* Toast Notification */}
+      {showToast && (
+        <div className="fixed bottom-6 right-6 bg-brand-500 text-dark-950 px-5 py-3.5 rounded-xl shadow-[0_10px_40px_rgba(255,122,0,0.3)] font-medium text-sm flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300 z-50">
+          <CheckCircle2 className="size-5" />
+          <div>
+            <p className="font-bold text-base">Alerts Activated!</p>
+            <p className="opacity-90">Email alerts are now active and will be sent to your inbox.</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

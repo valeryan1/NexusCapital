@@ -53,8 +53,11 @@ function LandingPage() {
         )}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center justify-center px-4 border-b border-dark-800 bg-dark-900/50 backdrop-blur-sm z-10 w-full overflow-hidden">
-          <Link to="/" className="flex items-center group">
+        <div className={cn(
+          "h-16 flex items-center border-b border-dark-800 bg-dark-900/50 backdrop-blur-sm z-10 w-full overflow-hidden transition-all duration-300",
+          isCollapsed ? "justify-center px-0" : "justify-start px-5"
+        )}>
+          <Link to="/" className={cn("flex items-center group transition-transform duration-300", !isCollapsed && "-ml-[30px]")}>
             <div className="w-20 h-20 flex shrink-0 items-center justify-center transition-all group-hover:scale-105">
               <img src="/logo.png" alt="NexusCapital" className="w-full h-full object-contain drop-shadow-lg" />
             </div>
