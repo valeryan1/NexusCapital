@@ -14,7 +14,6 @@ import {
   PieChart,
   Plus,
   Search,
-  Settings,
   Sparkles,
   Zap,
 } from "lucide-react";
@@ -35,7 +34,6 @@ const navItemsWorkspace = [
 const navItemsIntegration = [
   { id: "api", label: "API Gateway", icon: Code, path: "/api" },
   { id: "billing", label: "Billing", icon: CreditCard, path: "/billing" },
-  { id: "settings", label: "Settings", icon: Settings, path: "/settings" },
 ];
 
 function LandingPage() {
@@ -56,12 +54,12 @@ function LandingPage() {
       >
         {/* Logo */}
         <div className="h-16 flex items-center justify-center px-4 border-b border-dark-800 bg-dark-900/50 backdrop-blur-sm z-10 w-full overflow-hidden">
-          <Link to="/" className="flex items-center gap-4 group">
+          <Link to="/" className="flex items-center group">
             <div className="w-20 h-20 flex shrink-0 items-center justify-center transition-all group-hover:scale-105">
-              <img src="/logo.png" alt="Logo" className="w-full h-full object-contain drop-shadow-lg" />
+              <img src="/logo.png" alt="NexusCapital" className="w-full h-full object-contain drop-shadow-lg" />
             </div>
             {!isCollapsed && (
-              <span className="text-3xl font-bold text-white tracking-tight">
+              <span className="text-3xl font-bold text-white tracking-tight -ml-5">
                 Nexus<span className="text-brand-500">Capital</span>
               </span>
             )}
@@ -128,19 +126,22 @@ function LandingPage() {
         </button>
 
         {/* Bottom Actions */}
-        <div className="p-3 border-t border-dark-800 bg-dark-900 space-y-2">
-          <Button asChild variant="ghost" className="w-full text-gray-300 hover:text-white hover:bg-dark-800 justify-start">
+        <div className="p-3 border-t border-dark-800/50 bg-dark-900/60 space-y-2">
+          <Button asChild variant="ghost" className="w-full text-gray-300 hover:text-white hover:bg-dark-800 justify-center">
             <Link to="/sign-in">Sign In</Link>
           </Button>
-          <Button asChild className="w-full bg-brand-500 text-dark-950 font-bold hover:bg-brand-400">
+          <Button asChild className="w-full bg-brand-500 text-dark-950 font-bold hover:bg-brand-400 shadow-[0_8px_20px_-6px_rgba(255,122,0,0.45)] justify-center">
             <Link to="/sign-up">Get Started</Link>
           </Button>
         </div>
       </aside>
 
       <div className="flex-1 flex flex-col h-screen overflow-hidden bg-gradient-to-br from-yellow-400/20 via-yellow-900/15 to-dark-950 relative">
-        {/* Ambient Background Glow */}
+        {/* Ambient Background Glows */}
         <div className="absolute top-[-20%] left-[20%] w-[50%] h-[50%] rounded-full bg-brand-900/30 blur-[120px] pointer-events-none"></div>
+        <div className="absolute bottom-[-15%] right-[-10%] w-[45%] h-[45%] rounded-full bg-orange-600/25 blur-[110px] pointer-events-none"></div>
+        <div className="absolute top-[30%] left-[-12%] w-[35%] h-[35%] rounded-full bg-brand-500/15 blur-[100px] pointer-events-none"></div>
+        <div className="absolute top-[55%] right-[15%] w-[25%] h-[25%] rounded-full bg-yellow-400/10 blur-[90px] pointer-events-none"></div>
 
         {/* Header */}
         <header className="h-16 flex-shrink-0 glass border-b border-dark-800 flex items-center justify-between px-4 sm:px-6 z-10">

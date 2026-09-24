@@ -16,11 +16,11 @@ function AuthLayout() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-brand-500/10 rounded-full blur-[100px] pointer-events-none z-0"></div>
 
       <header className="absolute top-0 left-0 right-0 z-10 flex h-32 items-center justify-center px-6">
-        <Link to="/" className="flex items-center gap-4 cursor-pointer group">
+        <Link to="/" className="flex items-center cursor-pointer group">
           <div className="w-[100px] h-[100px] flex shrink-0 items-center justify-center transition-all group-hover:scale-105">
-            <img src="/logo.png" alt="Logo" className="w-full h-full object-contain drop-shadow-xl" />
+            <img src="/logo.png" alt="NexusCapital" className="w-full h-full object-contain drop-shadow-xl" />
           </div>
-          <span className="font-bold text-4xl text-white tracking-tight">Nexus<span className="text-brand-500">Capital</span></span>
+          <span className="font-bold text-4xl text-white tracking-tight -ml-6">Nexus<span className="text-brand-500">Capital</span></span>
         </Link>
       </header>
 
