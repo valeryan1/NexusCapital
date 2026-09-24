@@ -15,12 +15,12 @@ function AuthLayout() {
       <div className="absolute inset-0 bg-grid-pattern opacity-30 z-0"></div>
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-brand-500/10 rounded-full blur-[100px] pointer-events-none z-0"></div>
 
-      <header className="absolute top-0 left-0 right-0 z-10 flex h-24 items-center justify-center px-6">
-        <Link to="/" className="flex items-center gap-3 cursor-pointer group">
-          <div className="w-20 h-20 flex shrink-0 items-center justify-center transition-all group-hover:scale-105">
+      <header className="absolute top-0 left-0 right-0 z-10 flex h-32 items-center justify-center px-6">
+        <Link to="/" className="flex items-center gap-4 cursor-pointer group">
+          <div className="w-[100px] h-[100px] flex shrink-0 items-center justify-center transition-all group-hover:scale-105">
             <img src="/logo.png" alt="Logo" className="w-full h-full object-contain drop-shadow-xl" />
           </div>
-          <span className="font-bold text-3xl text-white tracking-tight">Nexus<span className="text-brand-500">Capital</span></span>
+          <span className="font-bold text-4xl text-white tracking-tight">Nexus<span className="text-brand-500">Capital</span></span>
         </Link>
       </header>
 
