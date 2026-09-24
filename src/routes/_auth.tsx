@@ -17,7 +17,9 @@ function AuthLayout() {
 
       <header className="absolute top-0 left-0 right-0 z-10 flex h-20 items-center px-6">
         <Link to="/" className="flex items-center gap-2 cursor-pointer group">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-orange-600 flex items-center justify-center text-white font-bold text-lg shadow-[0_0_15px_rgba(255,122,0,0.3)] group-hover:shadow-[0_0_20px_rgba(255,122,0,0.6)] transition-all">N</div>
+          <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center shadow-[0_0_15px_rgba(255,122,0,0.3)] group-hover:shadow-[0_0_20px_rgba(255,122,0,0.6)] transition-all">
+            <img src="/logo.jpeg" alt="Logo" className="w-full h-full object-cover" />
+          </div>
           <span className="font-bold text-lg text-white tracking-tight">Nexus<span className="text-brand-500">Capital</span></span>
         </Link>
       </header>
