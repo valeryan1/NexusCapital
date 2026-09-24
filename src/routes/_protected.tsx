@@ -197,13 +197,6 @@ function ProtectedLayout() {
             >
               <Menu className="size-6" />
             </button>
-            
-            {/* Search Bar */}
-            <div className="hidden sm:flex items-center bg-background border border-dark-800 rounded-full px-4 py-1.5 focus-within:border-brand-500 focus-within:ring-1 focus-within:ring-brand-500 transition-all w-64 shadow-inner shadow-dark-900">
-              <Search className="text-gray-500 size-4" />
-              <input type="text" placeholder="Search reports..." className="bg-transparent border-none text-white text-sm focus:outline-none ml-2 w-full placeholder-gray-600" />
-              <div className="text-[10px] text-gray-500 font-mono border border-dark-700 rounded px-1.5 bg-dark-800 hidden lg:block">⌘K</div>
-            </div>
           </div>
 
           <div className="flex items-center gap-4">
