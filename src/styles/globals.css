@@ -33,13 +33,18 @@
   --color-brand-500: #FF7A00;
   --color-brand-400: #FFA64D;
   --color-brand-900: #4a2500;
-  --color-dark-950: #09090B;
-  --color-dark-900: #18181B;
-  --color-dark-800: #27272A;
-  --color-dark-700: #3F3F46;
+  --color-dark-950: var(--ds-dark-950);
+  --color-dark-900: var(--ds-dark-900);
+  --color-dark-800: var(--ds-dark-800);
+  --color-dark-700: var(--ds-dark-700);
   --color-semantic-bull: #10B981;
   --color-semantic-bear: #F43F5E;
   --color-semantic-info: #3B82F6;
+  
+  --color-white: var(--ds-white);
+  --color-gray-300: var(--ds-gray-300);
+  --color-gray-400: var(--ds-gray-400);
+  --color-gray-500: var(--ds-gray-500);
 
   /* Custom animations */
   --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
@@ -72,6 +77,42 @@
   --accent-foreground: #09090B;
   --border: #3F3F46; /* dark-700 */
   --destructive: #F43F5E; /* semantic-bear */
+
+  /* Theming Variables (Default Dark) */
+  --ds-dark-950: #09090B;
+  --ds-dark-900: #18181B;
+  --ds-dark-800: #27272A;
+  --ds-dark-700: #3F3F46;
+  --ds-white: #FFFFFF;
+  --ds-gray-300: #D1D5DB;
+  --ds-gray-400: #9CA3AF;
+  --ds-gray-500: #6B7280;
+}
+
+.light {
+  --background: #F4F4F5;
+  --foreground: #09090B;
+  --card: #FFFFFF;
+  --card-foreground: #09090B;
+  --primary: #FF7A00;
+  --primary-foreground: #FFFFFF;
+  --secondary: #E4E4E7;
+  --muted: #E4E4E7;
+  --muted-foreground: #52525B;
+  --accent: #FFA64D;
+  --accent-foreground: #09090B;
+  --border: #D4D4D8;
+  --destructive: #F43F5E;
+
+  /* Inverted Theme Variables for Light Mode */
+  --ds-dark-950: #F4F4F5; /* Background */
+  --ds-dark-900: #FFFFFF; /* Cards */
+  --ds-dark-800: #E4E4E7; /* Borders/Hover */
+  --ds-dark-700: #D4D4D8; /* Deeper Borders */
+  --ds-white: #09090B;    /* Text that was white is now black */
+  --ds-gray-300: #4B5563; /* Darker gray for text */
+  --ds-gray-400: #6B7280;
+  --ds-gray-500: #9CA3AF;
 }
 
 .dark {

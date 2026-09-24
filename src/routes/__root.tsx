@@ -40,6 +40,23 @@ function RootDocument({ children }: { children: ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                var theme = localStorage.getItem('theme') || 'dark';
+                var classList = document.documentElement.classList;
+                if (theme === 'system') {
+                  if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+                    classList.add('light');
+                  }
+                } else if (theme === 'light') {
+                  classList.add('light');
+                }
+              } catch (e) {}
+            `,
+          }}
+        />
       </head>
       <body>
         <Providers>

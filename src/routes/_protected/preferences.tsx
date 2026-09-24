@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { siteConfig } from "@/config/site";
 import { Settings2, Moon, Sun, Monitor, Bell, Image } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export const Route = createFileRoute("/_protected/preferences")({
   head: () => ({ meta: [{ title: `Preferences | ${siteConfig.name}` }] }),
@@ -9,9 +9,33 @@ export const Route = createFileRoute("/_protected/preferences")({
 });
 
 function PreferencesPage() {
-  // Theme state (mock)
-  const [theme, setTheme] = useState<"system" | "dark" | "light">("dark");
+  const [theme, setThemeState] = useState<"system" | "dark" | "light">(() => {
+    return (localStorage.getItem("theme") as "system" | "dark" | "light") || "dark";
+  });
   const [emailAlerts, setEmailAlerts] = useState(true);
+
+  const applyTheme = (newTheme: "system" | "dark" | "light") => {
+    const root = window.document.documentElement;
+    root.classList.remove("light", "dark");
+    
+    if (newTheme === "system") {
+      const systemTheme = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      root.classList.add(systemTheme);
+    } else {
+      root.classList.add(newTheme);
+    }
+  };
+
+  const setTheme = (newTheme: "system" | "dark" | "light") => {
+    setThemeState(newTheme);
+    localStorage.setItem("theme", newTheme);
+    applyTheme(newTheme);
+  };
+
+  // Run once on mount to ensure correct classes if changed externally
+  useEffect(() => {
+    applyTheme(theme);
+  }, [theme]);
 
   return (
     <div className="view-section animate-fade-in max-w-4xl mx-auto space-y-8 py-8">
