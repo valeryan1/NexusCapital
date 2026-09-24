@@ -57,11 +57,11 @@ function LandingPage() {
         {/* Logo */}
         <div className="h-16 flex items-center justify-center px-4 border-b border-dark-800 bg-dark-900/50 backdrop-blur-sm z-10 w-full overflow-hidden">
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-14 h-14 flex shrink-0 items-center justify-center transition-all group-hover:scale-105">
+            <div className="w-16 h-16 flex shrink-0 items-center justify-center transition-all group-hover:scale-105">
               <img src="/logo.png" alt="Logo" className="w-full h-full object-contain drop-shadow-lg" />
             </div>
             {!isCollapsed && (
-              <span className="text-xl font-bold text-white tracking-tight">
+              <span className="text-2xl font-bold text-white tracking-tight">
                 Nexus<span className="text-brand-500">Capital</span>
               </span>
             )}
