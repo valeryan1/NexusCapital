@@ -57,7 +57,7 @@ function LandingPage() {
         {/* Logo */}
         <div className="h-16 flex items-center justify-center px-4 border-b border-dark-800 bg-dark-900/50 backdrop-blur-sm z-10 w-full overflow-hidden">
           <Link to="/" className="inline-flex items-center gap-3 rounded-sm tracking-tight group">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg overflow-hidden shadow-[0_0_10px_rgba(255,122,0,0.3)]">
+            <div className="flex w-24 h-10 shrink-0 items-center justify-center rounded-lg overflow-hidden shadow-[0_0_10px_rgba(255,122,0,0.3)]">
               <img src="/logo.jpeg" alt="Logo" className="w-full h-full object-cover" />
             </div>
             {!isCollapsed && (
