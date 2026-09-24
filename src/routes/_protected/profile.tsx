@@ -1,7 +1,7 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { siteConfig } from "@/config/site";
-import { User, Check, AlertCircle, Mail } from "lucide-react";
-import { useState } from "react";
+import { User, Check, AlertCircle, Mail, Upload } from "lucide-react";
+import { useState, useRef } from "react";
 import { authClient } from "@/lib/auth-client";
 
 export const Route = createFileRoute("/_protected/profile")({
@@ -14,11 +14,23 @@ function ProfilePage() {
   const router = useRouter();
   
   const [name, setName] = useState(user.name || "");
-  const [email, setEmail] = useState(user.email || ""); // Editable now, with confirmation note
-  const [image, setImage] = useState(user.image || "");
+  const [email, setEmail] = useState(user.email || "");
+  const [previewImage, setPreviewImage] = useState(user.image || "");
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState<{ type: "success" | "error" | "info", message: string } | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const objectUrl = URL.createObjectURL(file);
+      setPreviewImage(objectUrl);
+    }
+  };
 
   async function handleUpdateProfile(e: React.FormEvent) {
     e.preventDefault();
@@ -26,15 +38,25 @@ function ProfilePage() {
     setStatus(null);
 
     try {
-      // If email is changed, they will need to check their email for confirmation
       const isEmailChanged = email !== user.email;
 
-      // Note: Actual API for email/password updates may require specific endpoints in better-auth
-      // We will just call updateUser for name and image here for standard flow.
+      // Prepare image update. If there's a file, in a real app you'd upload to S3/Cloudinary first
+      // Here we might just convert to base64 if better-auth accepts it, or keep it as is.
+      let finalImageUrl = user.image;
+      
+      if (imageFile) {
+        // Simulating upload - for now, we'll convert to base64 to store in auth client
+        const base64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(imageFile);
+        });
+        finalImageUrl = base64;
+      }
+
       const { data, error } = await authClient.updateUser({
         name: name,
-        image: image ? image : undefined,
-        // Depending on your better-auth config, updating email may be supported via another function
+        image: finalImageUrl ? finalImageUrl : undefined,
       });
 
       if (error) {
@@ -70,19 +92,35 @@ function ProfilePage() {
           
           <div className="flex items-center gap-6 mb-8">
             <img 
-              src={image || user.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=27272A&color=FF7A00&bold=true`} 
+              src={previewImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=27272A&color=FF7A00&bold=true`} 
               alt="Avatar" 
               className="w-20 h-20 rounded-full border-2 border-dark-700 object-cover"
             />
             <div className="flex-1">
-              <label className="text-xs font-medium text-gray-400 block mb-1">Profile Photo URL</label>
+              <label className="text-xs font-medium text-gray-400 block mb-2">Profile Photo</label>
               <input 
-                type="url" 
-                value={image}
-                onChange={(e) => setImage(e.target.value)}
-                placeholder="https://example.com/avatar.png"
-                className="w-full bg-dark-950 border border-dark-700 rounded-lg px-3 py-2 text-sm text-white focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all" 
+                type="file" 
+                ref={fileInputRef}
+                onChange={handleImageChange}
+                accept="image/*"
+                className="hidden"
               />
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center gap-2 bg-dark-800 hover:bg-dark-700 border border-dark-700 text-sm text-white px-4 py-2 rounded-lg transition-colors"
+                >
+                  <Upload className="size-4" />
+                  Upload Photo
+                </button>
+                {imageFile && (
+                  <span className="text-xs text-brand-500 font-medium truncate max-w-[200px]">
+                    {imageFile.name}
+                  </span>
+                )}
+              </div>
+              <p className="text-[10px] text-gray-500 mt-2">Recommended: Square JPG, PNG, or GIF. Max 2MB.</p>
             </div>
           </div>
 
@@ -140,7 +178,7 @@ function ProfilePage() {
           <div className="flex justify-end pt-4">
             <button 
               type="submit"
-              disabled={isSubmitting || (name === user.name && image === (user.image || "") && email === user.email && !password)}
+              disabled={isSubmitting || (name === user.name && !imageFile && email === user.email && !password)}
               className="text-sm text-dark-950 bg-brand-500 hover:bg-brand-400 font-bold px-6 py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {isSubmitting ? "Saving Changes..." : "Save Profile"}
