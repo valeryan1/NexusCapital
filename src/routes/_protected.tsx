@@ -38,7 +38,6 @@ const navItemsWorkspace = [
 const navItemsIntegration = [
   { id: "api", label: "API Gateway", icon: Code, path: "/api" },
   { id: "billing", label: "Billing", icon: Settings, path: "/billing" },
-  { id: "settings", label: "Settings", icon: Settings, path: "/settings" },
 ];
 
 function ProtectedLayout() {
@@ -166,11 +165,11 @@ function ProtectedLayout() {
                     <p className="text-xs text-gray-500 truncate">{user.email}</p>
                   </div>
                   <div className="p-1">
-                    <Link to="/settings" className="flex items-center gap-2 px-2 py-1.5 text-sm text-gray-300 hover:text-white hover:bg-dark-800 rounded-md transition-colors" onClick={() => setProfileMenuOpen(false)}>
+                    <Link to="/profile" className="flex items-center gap-2 px-2 py-1.5 text-sm text-gray-300 hover:text-white hover:bg-dark-800 rounded-md transition-colors" onClick={() => setProfileMenuOpen(false)}>
                       <User className="size-4" />
                       Edit Profile
                     </Link>
-                    <Link to="/settings" className="flex items-center gap-2 px-2 py-1.5 text-sm text-gray-300 hover:text-white hover:bg-dark-800 rounded-md transition-colors" onClick={() => setProfileMenuOpen(false)}>
+                    <Link to="/preferences" className="flex items-center gap-2 px-2 py-1.5 text-sm text-gray-300 hover:text-white hover:bg-dark-800 rounded-md transition-colors" onClick={() => setProfileMenuOpen(false)}>
                       <Settings className="size-4" />
                       Preferences
                     </Link>

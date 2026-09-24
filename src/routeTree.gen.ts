@@ -19,8 +19,9 @@ import { Route as ProtectedAlertsRouteImport } from './routes/_protected/alerts'
 import { Route as ProtectedApiRouteImport } from './routes/_protected/api'
 import { Route as ProtectedAppRouteImport } from './routes/_protected/app'
 import { Route as ProtectedBillingRouteImport } from './routes/_protected/billing'
+import { Route as ProtectedPreferencesRouteImport } from './routes/_protected/preferences'
+import { Route as ProtectedProfileRouteImport } from './routes/_protected/profile'
 import { Route as ProtectedResearchRouteImport } from './routes/_protected/research'
-import { Route as ProtectedSettingsRouteImport } from './routes/_protected/settings'
 import { Route as ProtectedValuationRouteImport } from './routes/_protected/valuation'
 import { Route as ProtectedReportIdRouteImport } from './routes/_protected/report/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -77,14 +78,19 @@ const ProtectedBillingRoute = ProtectedBillingRouteImport.update({
   path: '/billing',
   getParentRoute: () => ProtectedRoute,
 } as any)
+const ProtectedPreferencesRoute = ProtectedPreferencesRouteImport.update({
+  id: '/preferences',
+  path: '/preferences',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedProfileRoute = ProtectedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => ProtectedRoute,
+} as any)
 const ProtectedResearchRoute = ProtectedResearchRouteImport.update({
   id: '/research',
   path: '/research',
-  getParentRoute: () => ProtectedRoute,
-} as any)
-const ProtectedSettingsRoute = ProtectedSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
   getParentRoute: () => ProtectedRoute,
 } as any)
 const ProtectedValuationRoute = ProtectedValuationRouteImport.update({
@@ -132,8 +138,9 @@ export interface FileRoutesByFullPath {
   '/api': typeof ProtectedApiRoute
   '/app': typeof ProtectedAppRoute
   '/billing': typeof ProtectedBillingRoute
+  '/preferences': typeof ProtectedPreferencesRoute
+  '/profile': typeof ProtectedProfileRoute
   '/research': typeof ProtectedResearchRoute
-  '/settings': typeof ProtectedSettingsRoute
   '/valuation': typeof ProtectedValuationRoute
   '/report/$id': typeof ProtectedReportIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -151,8 +158,9 @@ export interface FileRoutesByTo {
   '/api': typeof ProtectedApiRoute
   '/app': typeof ProtectedAppRoute
   '/billing': typeof ProtectedBillingRoute
+  '/preferences': typeof ProtectedPreferencesRoute
+  '/profile': typeof ProtectedProfileRoute
   '/research': typeof ProtectedResearchRoute
-  '/settings': typeof ProtectedSettingsRoute
   '/valuation': typeof ProtectedValuationRoute
   '/report/$id': typeof ProtectedReportIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -173,8 +181,9 @@ export interface FileRoutesById {
   '/_protected/api': typeof ProtectedApiRoute
   '/_protected/app': typeof ProtectedAppRoute
   '/_protected/billing': typeof ProtectedBillingRoute
+  '/_protected/preferences': typeof ProtectedPreferencesRoute
+  '/_protected/profile': typeof ProtectedProfileRoute
   '/_protected/research': typeof ProtectedResearchRoute
-  '/_protected/settings': typeof ProtectedSettingsRoute
   '/_protected/valuation': typeof ProtectedValuationRoute
   '/_protected/report/$id': typeof ProtectedReportIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -194,8 +203,9 @@ export interface FileRouteTypes {
     | '/api'
     | '/app'
     | '/billing'
+    | '/preferences'
+    | '/profile'
     | '/research'
-    | '/settings'
     | '/valuation'
     | '/report/$id'
     | '/api/auth/$'
@@ -213,8 +223,9 @@ export interface FileRouteTypes {
     | '/api'
     | '/app'
     | '/billing'
+    | '/preferences'
+    | '/profile'
     | '/research'
-    | '/settings'
     | '/valuation'
     | '/report/$id'
     | '/api/auth/$'
@@ -234,8 +245,9 @@ export interface FileRouteTypes {
     | '/_protected/api'
     | '/_protected/app'
     | '/_protected/billing'
+    | '/_protected/preferences'
+    | '/_protected/profile'
     | '/_protected/research'
-    | '/_protected/settings'
     | '/_protected/valuation'
     | '/_protected/report/$id'
     | '/api/auth/$'
@@ -328,18 +340,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedBillingRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/preferences': {
+      id: '/_protected/preferences'
+      path: '/preferences'
+      fullPath: '/preferences'
+      preLoaderRoute: typeof ProtectedPreferencesRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/profile': {
+      id: '/_protected/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProtectedProfileRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
     '/_protected/research': {
       id: '/_protected/research'
       path: '/research'
       fullPath: '/research'
       preLoaderRoute: typeof ProtectedResearchRouteImport
-      parentRoute: typeof ProtectedRoute
-    }
-    '/_protected/settings': {
-      id: '/_protected/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof ProtectedSettingsRouteImport
       parentRoute: typeof ProtectedRoute
     }
     '/_protected/valuation': {
@@ -412,8 +431,9 @@ interface ProtectedRouteChildren {
   ProtectedApiRoute: typeof ProtectedApiRoute
   ProtectedAppRoute: typeof ProtectedAppRoute
   ProtectedBillingRoute: typeof ProtectedBillingRoute
+  ProtectedPreferencesRoute: typeof ProtectedPreferencesRoute
+  ProtectedProfileRoute: typeof ProtectedProfileRoute
   ProtectedResearchRoute: typeof ProtectedResearchRoute
-  ProtectedSettingsRoute: typeof ProtectedSettingsRoute
   ProtectedValuationRoute: typeof ProtectedValuationRoute
   ProtectedReportIdRoute: typeof ProtectedReportIdRoute
 }
@@ -424,8 +444,9 @@ const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedApiRoute: ProtectedApiRoute,
   ProtectedAppRoute: ProtectedAppRoute,
   ProtectedBillingRoute: ProtectedBillingRoute,
+  ProtectedPreferencesRoute: ProtectedPreferencesRoute,
+  ProtectedProfileRoute: ProtectedProfileRoute,
   ProtectedResearchRoute: ProtectedResearchRoute,
-  ProtectedSettingsRoute: ProtectedSettingsRoute,
   ProtectedValuationRoute: ProtectedValuationRoute,
   ProtectedReportIdRoute: ProtectedReportIdRoute,
 }
