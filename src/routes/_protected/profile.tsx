@@ -71,10 +71,7 @@ function ProfilePage() {
         setStatus({ type: "success", message: "Profile updated successfully." });
       }
     } catch (err: unknown) {
-      setStatus({
-        type: "error",
-        message: err instanceof Error ? err.message : "An error occurred.",
-      });
+      setStatus({ type: "error", message: err instanceof Error ? err.message : "An error occurred." });
     } finally {
       setIsSubmitting(false);
     }

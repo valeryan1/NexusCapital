@@ -18,6 +18,7 @@ import { Route as ProtectedAdminRouteImport } from './routes/_protected/admin'
 import { Route as ProtectedAlertsRouteImport } from './routes/_protected/alerts'
 import { Route as ProtectedApiRouteImport } from './routes/_protected/api'
 import { Route as ProtectedAppRouteImport } from './routes/_protected/app'
+import { Route as ProtectedAssistantRouteImport } from './routes/_protected/assistant'
 import { Route as ProtectedBillingRouteImport } from './routes/_protected/billing'
 import { Route as ProtectedIpoRouteImport } from './routes/_protected/ipo'
 import { Route as ProtectedPreferencesRouteImport } from './routes/_protected/preferences'
@@ -73,6 +74,11 @@ const ProtectedApiRoute = ProtectedApiRouteImport.update({
 const ProtectedAppRoute = ProtectedAppRouteImport.update({
   id: '/app',
   path: '/app',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedAssistantRoute = ProtectedAssistantRouteImport.update({
+  id: '/assistant',
+  path: '/assistant',
   getParentRoute: () => ProtectedRoute,
 } as any)
 const ProtectedBillingRoute = ProtectedBillingRouteImport.update({
@@ -149,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/alerts': typeof ProtectedAlertsRoute
   '/api': typeof ProtectedApiRoute
   '/app': typeof ProtectedAppRoute
+  '/assistant': typeof ProtectedAssistantRoute
   '/billing': typeof ProtectedBillingRoute
   '/ipo': typeof ProtectedIpoRoute
   '/preferences': typeof ProtectedPreferencesRoute
@@ -171,6 +178,7 @@ export interface FileRoutesByTo {
   '/alerts': typeof ProtectedAlertsRoute
   '/api': typeof ProtectedApiRoute
   '/app': typeof ProtectedAppRoute
+  '/assistant': typeof ProtectedAssistantRoute
   '/billing': typeof ProtectedBillingRoute
   '/ipo': typeof ProtectedIpoRoute
   '/preferences': typeof ProtectedPreferencesRoute
@@ -196,6 +204,7 @@ export interface FileRoutesById {
   '/_protected/alerts': typeof ProtectedAlertsRoute
   '/_protected/api': typeof ProtectedApiRoute
   '/_protected/app': typeof ProtectedAppRoute
+  '/_protected/assistant': typeof ProtectedAssistantRoute
   '/_protected/billing': typeof ProtectedBillingRoute
   '/_protected/ipo': typeof ProtectedIpoRoute
   '/_protected/preferences': typeof ProtectedPreferencesRoute
@@ -220,6 +229,7 @@ export interface FileRouteTypes {
     | '/alerts'
     | '/api'
     | '/app'
+    | '/assistant'
     | '/billing'
     | '/ipo'
     | '/preferences'
@@ -242,6 +252,7 @@ export interface FileRouteTypes {
     | '/alerts'
     | '/api'
     | '/app'
+    | '/assistant'
     | '/billing'
     | '/ipo'
     | '/preferences'
@@ -266,6 +277,7 @@ export interface FileRouteTypes {
     | '/_protected/alerts'
     | '/_protected/api'
     | '/_protected/app'
+    | '/_protected/assistant'
     | '/_protected/billing'
     | '/_protected/ipo'
     | '/_protected/preferences'
@@ -356,6 +368,13 @@ declare module '@tanstack/react-router' {
       path: '/app'
       fullPath: '/app'
       preLoaderRoute: typeof ProtectedAppRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/assistant': {
+      id: '/_protected/assistant'
+      path: '/assistant'
+      fullPath: '/assistant'
+      preLoaderRoute: typeof ProtectedAssistantRouteImport
       parentRoute: typeof ProtectedRoute
     }
     '/_protected/billing': {
@@ -469,6 +488,7 @@ interface ProtectedRouteChildren {
   ProtectedAlertsRoute: typeof ProtectedAlertsRoute
   ProtectedApiRoute: typeof ProtectedApiRoute
   ProtectedAppRoute: typeof ProtectedAppRoute
+  ProtectedAssistantRoute: typeof ProtectedAssistantRoute
   ProtectedBillingRoute: typeof ProtectedBillingRoute
   ProtectedIpoRoute: typeof ProtectedIpoRoute
   ProtectedPreferencesRoute: typeof ProtectedPreferencesRoute
@@ -483,6 +503,7 @@ const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedAlertsRoute: ProtectedAlertsRoute,
   ProtectedApiRoute: ProtectedApiRoute,
   ProtectedAppRoute: ProtectedAppRoute,
+  ProtectedAssistantRoute: ProtectedAssistantRoute,
   ProtectedBillingRoute: ProtectedBillingRoute,
   ProtectedIpoRoute: ProtectedIpoRoute,
   ProtectedPreferencesRoute: ProtectedPreferencesRoute,

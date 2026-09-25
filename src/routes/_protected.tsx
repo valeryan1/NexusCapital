@@ -14,7 +14,8 @@ import {
   ChevronRight,
   Calculator,
   Landmark,
-  User
+  User,
+  Sparkles
 } from "lucide-react";
 import { cn } from "cn";
 import { Brand } from "@/components/brand";
@@ -28,6 +29,7 @@ export const Route = createFileRoute("/_protected")({
 });
 
 const navItemsWorkspace = [
+  { id: "assistant", label: "Nexus Assistant", icon: Sparkles, path: "/assistant" },
   { id: "overview", label: "Overview", icon: PieChart, path: "/app" },
   { id: "ipo", label: "IPO", icon: Landmark, path: "/ipo" },
   { id: "research", label: "Research Studio", icon: Bot, path: "/research" },
@@ -66,7 +68,9 @@ function ProtectedLayout() {
           {isCollapsed && <div className="h-4"></div>}
           
           {navItemsWorkspace.map((item) => {
-            const isActive = location.pathname === item.path || (item.path !== '/app' && location.pathname.startsWith(item.path));
+            const isActive = item.path === '/' 
+              ? location.pathname === '/' 
+              : location.pathname === item.path || (item.path !== '/app' && location.pathname.startsWith(item.path));
             return (
               <Link
                 key={item.path}
@@ -184,9 +188,11 @@ function ProtectedLayout() {
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col h-screen overflow-hidden bg-background relative">
-        {/* Ambient Background Glow */}
-        <div className="absolute top-[-20%] left-[20%] w-[50%] h-[50%] rounded-full bg-brand-900/30 blur-[120px] pointer-events-none"></div>
+      <div className="flex-1 flex flex-col h-screen overflow-hidden bg-gradient-to-br from-[#16161A] via-[#0E0E12] to-[#09090B] relative">
+        {/* Ambient Background Glow and Grid */}
+        <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] pointer-events-none mix-blend-screen"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,122,0,0.08)_0%,transparent_60%)] pointer-events-none"></div>
+        <div className="absolute top-[-10%] left-[25%] w-[50%] h-[40%] rounded-full bg-brand-500/10 blur-[120px] pointer-events-none"></div>
 
         {/* Header */}
         <header className="h-16 flex-shrink-0 glass border-b border-dark-800 flex items-center justify-between px-4 sm:px-6 z-10 transition-all">

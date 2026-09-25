@@ -3,7 +3,6 @@ import { siteConfig } from "@/config/site";
 import { Calculator, Search, SlidersHorizontal, TrendingUp, AlertCircle, Filter, Sparkles, X, GripVertical } from "lucide-react";
 import { useState, useRef } from "react";
 
-
 export const Route = createFileRoute("/_protected/valuation")({
   head: () => ({ meta: [{ title: `Valuation Screener | ${siteConfig.name}` }] }),
   component: ValuationPage,
