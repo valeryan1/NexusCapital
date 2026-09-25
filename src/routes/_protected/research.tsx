@@ -5,7 +5,6 @@ import {
   Search, 
   TrendingUp, 
   TrendingDown, 
-  Minus, 
   Calendar, 
   PieChart as PieChartIcon, 
   Activity, 

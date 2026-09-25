@@ -5,7 +5,6 @@ import {
   Bot, 
   Menu, 
   PieChart, 
-  Search, 
   Settings, 
   Zap, 
   Code,
@@ -14,8 +13,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Calculator,
-  User,
-  LogOut
+  Landmark,
+  User
 } from "lucide-react";
 import { cn } from "cn";
 import { Brand } from "@/components/brand";
@@ -30,6 +29,7 @@ export const Route = createFileRoute("/_protected")({
 
 const navItemsWorkspace = [
   { id: "overview", label: "Overview", icon: PieChart, path: "/app" },
+  { id: "ipo", label: "IPO", icon: Landmark, path: "/ipo" },
   { id: "research", label: "Research Studio", icon: Bot, path: "/research" },
   { id: "valuation", label: "Valuation Screener", icon: Calculator, path: "/valuation" },
   { id: "alerts", label: "Micro-Alerts", icon: Zap, path: "/alerts", badge: "3" },

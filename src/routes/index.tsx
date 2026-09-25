@@ -13,7 +13,6 @@ import {
   Menu,
   PieChart,
   Plus,
-  Search,
   Sparkles,
   Zap,
 } from "lucide-react";

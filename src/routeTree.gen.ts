@@ -19,12 +19,14 @@ import { Route as ProtectedAlertsRouteImport } from './routes/_protected/alerts'
 import { Route as ProtectedApiRouteImport } from './routes/_protected/api'
 import { Route as ProtectedAppRouteImport } from './routes/_protected/app'
 import { Route as ProtectedBillingRouteImport } from './routes/_protected/billing'
+import { Route as ProtectedIpoRouteImport } from './routes/_protected/ipo'
 import { Route as ProtectedPreferencesRouteImport } from './routes/_protected/preferences'
 import { Route as ProtectedProfileRouteImport } from './routes/_protected/profile'
 import { Route as ProtectedResearchRouteImport } from './routes/_protected/research'
 import { Route as ProtectedValuationRouteImport } from './routes/_protected/valuation'
 import { Route as ProtectedReportIdRouteImport } from './routes/_protected/report/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiIpoIndexRouteImport } from './routes/api/ipo/index'
 import { Route as ApiNotesIndexRouteImport } from './routes/api/notes/index'
 import { Route as ApiNotesIdRouteImport } from './routes/api/notes/$id'
 import { Route as ApiAdminNotesIndexRouteImport } from './routes/api/admin/notes/index'
@@ -78,6 +80,11 @@ const ProtectedBillingRoute = ProtectedBillingRouteImport.update({
   path: '/billing',
   getParentRoute: () => ProtectedRoute,
 } as any)
+const ProtectedIpoRoute = ProtectedIpoRouteImport.update({
+  id: '/ipo',
+  path: '/ipo',
+  getParentRoute: () => ProtectedRoute,
+} as any)
 const ProtectedPreferencesRoute = ProtectedPreferencesRouteImport.update({
   id: '/preferences',
   path: '/preferences',
@@ -106,6 +113,11 @@ const ProtectedReportIdRoute = ProtectedReportIdRouteImport.update({
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiIpoIndexRoute = ApiIpoIndexRouteImport.update({
+  id: '/api/ipo/',
+  path: '/api/ipo/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiNotesIndexRoute = ApiNotesIndexRouteImport.update({
@@ -138,6 +150,7 @@ export interface FileRoutesByFullPath {
   '/api': typeof ProtectedApiRoute
   '/app': typeof ProtectedAppRoute
   '/billing': typeof ProtectedBillingRoute
+  '/ipo': typeof ProtectedIpoRoute
   '/preferences': typeof ProtectedPreferencesRoute
   '/profile': typeof ProtectedProfileRoute
   '/research': typeof ProtectedResearchRoute
@@ -145,6 +158,7 @@ export interface FileRoutesByFullPath {
   '/report/$id': typeof ProtectedReportIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
+  '/api/ipo/': typeof ApiIpoIndexRoute
   '/api/notes/': typeof ApiNotesIndexRoute
   '/api/admin/notes/$id': typeof ApiAdminNotesIdRoute
   '/api/admin/notes/': typeof ApiAdminNotesIndexRoute
@@ -158,6 +172,7 @@ export interface FileRoutesByTo {
   '/api': typeof ProtectedApiRoute
   '/app': typeof ProtectedAppRoute
   '/billing': typeof ProtectedBillingRoute
+  '/ipo': typeof ProtectedIpoRoute
   '/preferences': typeof ProtectedPreferencesRoute
   '/profile': typeof ProtectedProfileRoute
   '/research': typeof ProtectedResearchRoute
@@ -165,6 +180,7 @@ export interface FileRoutesByTo {
   '/report/$id': typeof ProtectedReportIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
+  '/api/ipo': typeof ApiIpoIndexRoute
   '/api/notes': typeof ApiNotesIndexRoute
   '/api/admin/notes/$id': typeof ApiAdminNotesIdRoute
   '/api/admin/notes': typeof ApiAdminNotesIndexRoute
@@ -181,6 +197,7 @@ export interface FileRoutesById {
   '/_protected/api': typeof ProtectedApiRoute
   '/_protected/app': typeof ProtectedAppRoute
   '/_protected/billing': typeof ProtectedBillingRoute
+  '/_protected/ipo': typeof ProtectedIpoRoute
   '/_protected/preferences': typeof ProtectedPreferencesRoute
   '/_protected/profile': typeof ProtectedProfileRoute
   '/_protected/research': typeof ProtectedResearchRoute
@@ -188,6 +205,7 @@ export interface FileRoutesById {
   '/_protected/report/$id': typeof ProtectedReportIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
+  '/api/ipo/': typeof ApiIpoIndexRoute
   '/api/notes/': typeof ApiNotesIndexRoute
   '/api/admin/notes/$id': typeof ApiAdminNotesIdRoute
   '/api/admin/notes/': typeof ApiAdminNotesIndexRoute
@@ -203,6 +221,7 @@ export interface FileRouteTypes {
     | '/api'
     | '/app'
     | '/billing'
+    | '/ipo'
     | '/preferences'
     | '/profile'
     | '/research'
@@ -210,6 +229,7 @@ export interface FileRouteTypes {
     | '/report/$id'
     | '/api/auth/$'
     | '/api/notes/$id'
+    | '/api/ipo/'
     | '/api/notes/'
     | '/api/admin/notes/$id'
     | '/api/admin/notes/'
@@ -223,6 +243,7 @@ export interface FileRouteTypes {
     | '/api'
     | '/app'
     | '/billing'
+    | '/ipo'
     | '/preferences'
     | '/profile'
     | '/research'
@@ -230,6 +251,7 @@ export interface FileRouteTypes {
     | '/report/$id'
     | '/api/auth/$'
     | '/api/notes/$id'
+    | '/api/ipo'
     | '/api/notes'
     | '/api/admin/notes/$id'
     | '/api/admin/notes'
@@ -245,6 +267,7 @@ export interface FileRouteTypes {
     | '/_protected/api'
     | '/_protected/app'
     | '/_protected/billing'
+    | '/_protected/ipo'
     | '/_protected/preferences'
     | '/_protected/profile'
     | '/_protected/research'
@@ -252,6 +275,7 @@ export interface FileRouteTypes {
     | '/_protected/report/$id'
     | '/api/auth/$'
     | '/api/notes/$id'
+    | '/api/ipo/'
     | '/api/notes/'
     | '/api/admin/notes/$id'
     | '/api/admin/notes/'
@@ -263,6 +287,7 @@ export interface RootRouteChildren {
   ProtectedRoute: typeof ProtectedRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiNotesIdRoute: typeof ApiNotesIdRoute
+  ApiIpoIndexRoute: typeof ApiIpoIndexRoute
   ApiNotesIndexRoute: typeof ApiNotesIndexRoute
   ApiAdminNotesIdRoute: typeof ApiAdminNotesIdRoute
   ApiAdminNotesIndexRoute: typeof ApiAdminNotesIndexRoute
@@ -340,6 +365,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedBillingRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/ipo': {
+      id: '/_protected/ipo'
+      path: '/ipo'
+      fullPath: '/ipo'
+      preLoaderRoute: typeof ProtectedIpoRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
     '/_protected/preferences': {
       id: '/_protected/preferences'
       path: '/preferences'
@@ -380,6 +412,13 @@ declare module '@tanstack/react-router' {
       path: '/api/auth/$'
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/ipo/': {
+      id: '/api/ipo/'
+      path: '/api/ipo'
+      fullPath: '/api/ipo/'
+      preLoaderRoute: typeof ApiIpoIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/notes/': {
@@ -431,6 +470,7 @@ interface ProtectedRouteChildren {
   ProtectedApiRoute: typeof ProtectedApiRoute
   ProtectedAppRoute: typeof ProtectedAppRoute
   ProtectedBillingRoute: typeof ProtectedBillingRoute
+  ProtectedIpoRoute: typeof ProtectedIpoRoute
   ProtectedPreferencesRoute: typeof ProtectedPreferencesRoute
   ProtectedProfileRoute: typeof ProtectedProfileRoute
   ProtectedResearchRoute: typeof ProtectedResearchRoute
@@ -444,6 +484,7 @@ const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedApiRoute: ProtectedApiRoute,
   ProtectedAppRoute: ProtectedAppRoute,
   ProtectedBillingRoute: ProtectedBillingRoute,
+  ProtectedIpoRoute: ProtectedIpoRoute,
   ProtectedPreferencesRoute: ProtectedPreferencesRoute,
   ProtectedProfileRoute: ProtectedProfileRoute,
   ProtectedResearchRoute: ProtectedResearchRoute,
@@ -461,6 +502,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProtectedRoute: ProtectedRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiNotesIdRoute: ApiNotesIdRoute,
+  ApiIpoIndexRoute: ApiIpoIndexRoute,
   ApiNotesIndexRoute: ApiNotesIndexRoute,
   ApiAdminNotesIdRoute: ApiAdminNotesIdRoute,
   ApiAdminNotesIndexRoute: ApiAdminNotesIndexRoute,

@@ -139,14 +139,11 @@ test("a granted role reaches every account, and losing it revokes access", async
   await ownerContext.close();
 });
 
-test("the admin page renders only for a permitted role", async ({ page }) => {
-  const email = `roles-${randomUUID()}@example.com`;
-  await page.goto("/sign-up");
-  await page.getByLabel("Name").fill("Page Viewer");
-  await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Password").fill("Roles-test-password-123!");
-  await page.getByRole("button", { name: "Create account" }).click();
-  await expect(page).toHaveURL(/\/app$/);
+test("the admin page renders only for a permitted role", async ({
+  context,
+  page,
+}) => {
+  const email = await signUp(context.request, "Page Viewer");
 
   await page.goto("/admin");
   await expect(page.getByText("Every account’s notes")).toHaveCount(0);
