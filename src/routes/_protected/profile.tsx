@@ -54,7 +54,7 @@ function ProfilePage() {
         finalImageUrl = base64;
       }
 
-      const { data, error } = await authClient.updateUser({
+      const { error } = await authClient.updateUser({
         name: name,
         image: finalImageUrl ? finalImageUrl : undefined,
       });
@@ -70,8 +70,8 @@ function ProfilePage() {
       } else {
         setStatus({ type: "success", message: "Profile updated successfully." });
       }
-    } catch (err: any) {
-      setStatus({ type: "error", message: err.message || "An error occurred." });
+    } catch (err: unknown) {
+      setStatus({ type: "error", message: err instanceof Error ? err.message : "An error occurred." });
     } finally {
       setIsSubmitting(false);
     }

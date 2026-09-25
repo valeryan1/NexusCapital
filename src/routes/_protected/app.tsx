@@ -11,6 +11,8 @@ import {
   Server, 
   Flame 
 } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_protected/app")({
   head: () => ({ meta: [{ title: `Overview | ${siteConfig.name}` }] }),
@@ -18,6 +20,17 @@ export const Route = createFileRoute("/_protected/app")({
 });
 
 function OverviewPage() {
+  const navigate = useNavigate();
+  const [ticker, setTicker] = useState("");
+
+  const handleRunAgents = () => {
+    if (!ticker.trim()) return;
+    navigate({
+      to: "/research",
+      search: { q: ticker.trim().toUpperCase(), auto: true }
+    });
+  };
+
   return (
     <div className="view-section animate-fade-in max-w-7xl mx-auto space-y-6">
       {/* Hero AI Prompt Section */}
@@ -40,9 +53,19 @@ function OverviewPage() {
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <Terminal className="text-brand-500 size-5" />
                   </div>
-                  <input type="text" placeholder="Enter Ticker (e.g., PGEO, MBMA)..." className="block w-full pl-11 pr-4 py-4 border border-dark-700 rounded-xl leading-5 bg-dark-950 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent sm:text-sm transition-all font-mono shadow-inner group-hover:border-dark-600 uppercase" />
+                  <input 
+                    type="text" 
+                    placeholder="Enter Ticker (e.g., PGEO, MBMA)..." 
+                    value={ticker}
+                    onChange={(e) => setTicker(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleRunAgents()}
+                    className="block w-full pl-11 pr-4 py-4 border border-dark-700 rounded-xl leading-5 bg-dark-950 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent sm:text-sm transition-all font-mono shadow-inner group-hover:border-dark-600 uppercase" 
+                  />
                 </div>
-                <button className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-sm font-bold rounded-xl text-dark-950 bg-brand-500 hover:bg-brand-400 focus:outline-none transition-all gap-2 shadow-[0_0_20px_rgba(255,122,0,0.3)] hover:shadow-[0_0_30px_rgba(255,166,77,0.5)] transform hover:-translate-y-0.5">
+                <button 
+                  onClick={handleRunAgents}
+                  className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-sm font-bold rounded-xl text-dark-950 bg-brand-500 hover:bg-brand-400 focus:outline-none transition-all gap-2 shadow-[0_0_20px_rgba(255,122,0,0.3)] hover:shadow-[0_0_30px_rgba(255,166,77,0.5)] transform hover:-translate-y-0.5"
+                >
                   Run Agents <Play className="size-3 fill-current" />
                 </button>
               </div>

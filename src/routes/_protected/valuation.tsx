@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { siteConfig } from "@/config/site";
-import { Calculator, Search, SlidersHorizontal, TrendingUp, AlertCircle, Filter } from "lucide-react";
+import { Search, SlidersHorizontal, AlertCircle, Filter } from "lucide-react";
 import { useState } from "react";
 
 export const Route = createFileRoute("/_protected/valuation")({
