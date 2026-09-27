@@ -788,18 +788,18 @@ function ResearchStudio() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center bg-dark-950 p-3 rounded-lg border border-dark-800">
                   <div>
-                    <div className="text-sm font-bold text-gray-200">Piotroski F-Score</div>
-                    <div className="text-[10px] text-gray-500">Financial Trend Strength</div>
+                    <div className="text-sm font-bold text-gray-900 dark:text-gray-200">Piotroski F-Score</div>
+                    <div className="text-[10px] text-gray-700 dark:text-gray-500">Financial Trend Strength</div>
                   </div>
                   <div className="text-right">
-                    <div className="text-xl font-black text-semantic-bull">{data.quantModels.piotroski.score}<span className="text-sm text-gray-500">/9</span></div>
+                    <div className="text-xl font-black text-semantic-bull">{data.quantModels.piotroski.score}<span className="text-sm text-gray-700 dark:text-gray-500">/9</span></div>
                     <div className="text-[10px] font-bold text-semantic-bull uppercase">{data.quantModels.piotroski.interpretation}</div>
                   </div>
                 </div>
                 <div className="flex justify-between items-center bg-dark-950 p-3 rounded-lg border border-dark-800">
                   <div>
-                    <div className="text-sm font-bold text-gray-200">Altman Z-Score</div>
-                    <div className="text-[10px] text-gray-500">Bankruptcy Probability</div>
+                    <div className="text-sm font-bold text-gray-900 dark:text-gray-200">Altman Z-Score</div>
+                    <div className="text-[10px] text-gray-700 dark:text-gray-500">Bankruptcy Probability</div>
                   </div>
                   <div className="text-right">
                     <div className="text-xl font-black text-semantic-bull">{data.quantModels.altman.score}</div>
