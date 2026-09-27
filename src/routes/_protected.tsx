@@ -16,7 +16,8 @@ import {
   Calculator,
   Landmark,
   User,
-  Sparkles
+  Sparkles,
+  Activity
 } from "lucide-react";
 import { cn } from "cn";
 import { Brand } from "@/components/brand";
@@ -35,6 +36,7 @@ const navItemsWorkspace = [
   { id: "research", label: "Research Studio", icon: Bot, path: "/research" },
   { id: "valuation", label: "Valuation Screener", icon: Calculator, path: "/valuation" },
   { id: "ipo", label: "IPO", icon: Landmark, path: "/ipo" },
+  { id: "sectors", label: "Sectors Dashboard", icon: Activity, path: "/sectors/banks" },
   { id: "alerts", label: "Micro-Alerts", icon: Zap, path: "/alerts", badge: "3" },
 ];
 

@@ -26,6 +26,7 @@ import { Route as ProtectedProfileRouteImport } from './routes/_protected/profil
 import { Route as ProtectedResearchRouteImport } from './routes/_protected/research'
 import { Route as ProtectedValuationRouteImport } from './routes/_protected/valuation'
 import { Route as ProtectedReportIdRouteImport } from './routes/_protected/report/$id'
+import { Route as ProtectedSectorsSectorIdRouteImport } from './routes/_protected/sectors/$sectorId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiChatIndexRouteImport } from './routes/api/chat/index'
 import { Route as ApiIpoIndexRouteImport } from './routes/api/ipo/index'
@@ -117,6 +118,12 @@ const ProtectedReportIdRoute = ProtectedReportIdRouteImport.update({
   path: '/report/$id',
   getParentRoute: () => ProtectedRoute,
 } as any)
+const ProtectedSectorsSectorIdRoute =
+  ProtectedSectorsSectorIdRouteImport.update({
+    id: '/sectors/$sectorId',
+    path: '/sectors/$sectorId',
+    getParentRoute: () => ProtectedRoute,
+  } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -169,6 +176,7 @@ export interface FileRoutesByFullPath {
   '/research': typeof ProtectedResearchRoute
   '/valuation': typeof ProtectedValuationRoute
   '/report/$id': typeof ProtectedReportIdRoute
+  '/sectors/$sectorId': typeof ProtectedSectorsSectorIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
   '/api/chat/': typeof ApiChatIndexRoute
@@ -193,6 +201,7 @@ export interface FileRoutesByTo {
   '/research': typeof ProtectedResearchRoute
   '/valuation': typeof ProtectedValuationRoute
   '/report/$id': typeof ProtectedReportIdRoute
+  '/sectors/$sectorId': typeof ProtectedSectorsSectorIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
   '/api/chat': typeof ApiChatIndexRoute
@@ -220,6 +229,7 @@ export interface FileRoutesById {
   '/_protected/research': typeof ProtectedResearchRoute
   '/_protected/valuation': typeof ProtectedValuationRoute
   '/_protected/report/$id': typeof ProtectedReportIdRoute
+  '/_protected/sectors/$sectorId': typeof ProtectedSectorsSectorIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
   '/api/chat/': typeof ApiChatIndexRoute
@@ -246,6 +256,7 @@ export interface FileRouteTypes {
     | '/research'
     | '/valuation'
     | '/report/$id'
+    | '/sectors/$sectorId'
     | '/api/auth/$'
     | '/api/notes/$id'
     | '/api/chat/'
@@ -270,6 +281,7 @@ export interface FileRouteTypes {
     | '/research'
     | '/valuation'
     | '/report/$id'
+    | '/sectors/$sectorId'
     | '/api/auth/$'
     | '/api/notes/$id'
     | '/api/chat'
@@ -296,6 +308,7 @@ export interface FileRouteTypes {
     | '/_protected/research'
     | '/_protected/valuation'
     | '/_protected/report/$id'
+    | '/_protected/sectors/$sectorId'
     | '/api/auth/$'
     | '/api/notes/$id'
     | '/api/chat/'
@@ -439,6 +452,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedReportIdRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/sectors/$sectorId': {
+      id: '/_protected/sectors/$sectorId'
+      path: '/sectors/$sectorId'
+      fullPath: '/sectors/$sectorId'
+      preLoaderRoute: typeof ProtectedSectorsSectorIdRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -516,6 +536,7 @@ interface ProtectedRouteChildren {
   ProtectedResearchRoute: typeof ProtectedResearchRoute
   ProtectedValuationRoute: typeof ProtectedValuationRoute
   ProtectedReportIdRoute: typeof ProtectedReportIdRoute
+  ProtectedSectorsSectorIdRoute: typeof ProtectedSectorsSectorIdRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
@@ -531,6 +552,7 @@ const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedResearchRoute: ProtectedResearchRoute,
   ProtectedValuationRoute: ProtectedValuationRoute,
   ProtectedReportIdRoute: ProtectedReportIdRoute,
+  ProtectedSectorsSectorIdRoute: ProtectedSectorsSectorIdRoute,
 }
 
 const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
