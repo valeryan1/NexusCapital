@@ -1,7 +1,92 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { siteConfig } from "@/config/site";
-import { Calculator, Search, SlidersHorizontal, TrendingUp, AlertCircle, Filter, Sparkles, X, GripVertical } from "lucide-react";
-import { useState, useRef } from "react";
+import { Search, SlidersHorizontal, AlertCircle, Filter, GripVertical, X, Sparkles } from "lucide-react";
+import { useState } from "react";
+import { createServerFn } from "@tanstack/react-start";
+import { getRequestHeaders } from "@tanstack/react-start/server";
+import { AddToWatchlistButton } from "@/components/add-to-watchlist-button";
+
+async function getCreditContext() {
+  const [{ getSession }, { consumeCredit, refundCredit }] = await Promise.all([
+    import("@/lib/session.server"),
+    import("@/services/credit.service.server"),
+  ]);
+  const session = await getSession(
+    getRequestHeaders() as unknown as Headers,
+  );
+  if (!session) throw new Error("Unauthorized");
+  return { userId: session.user.id, consumeCredit, refundCredit };
+}
+
+const fetchScreenerStocksFn = createServerFn({ method: "POST" })
+  .validator((whereQuery: string) => whereQuery)
+  .handler(async ({ data: whereQuery }) => {
+    const { userId, consumeCredit, refundCredit } = await getCreditContext();
+    const credits = await consumeCredit(userId);
+    try {
+      const apiKey = process.env.SECTORS_API_KEY;
+      if (!apiKey) throw new Error("SECTORS_API_KEY belum dikonfigurasi.");
+      const url = `https://api.sectors.app/v2/companies/?where=${encodeURIComponent(whereQuery)}&include_query_values=true&limit=10`;
+      const response = await fetch(url, { headers: { Authorization: apiKey } });
+      if (!response.ok) throw new Error("Sectors API sedang tidak tersedia.");
+      const data = await response.json();
+      const stocks = (data.results || []).map((res: Record<string, unknown>) => ({
+        ticker: (res.symbol as string)?.split('.')[0] || "",
+        name: (res.company_name as string) || "",
+        price: (res.query_values as Record<string, number>)?.last_close_price || 0,
+        sector: (res.query_values as Record<string, string>)?.sector || "",
+        per: Number(((res.query_values as Record<string, number>)?.pe_ttm || 0).toFixed(2)),
+        pbv: Number(((res.query_values as Record<string, number>)?.pb_mrq || 0).toFixed(2)),
+        roe: Number((((res.query_values as Record<string, number>)?.roe_ttm || 0) * 100).toFixed(2)),
+        der: Number(((res.query_values as Record<string, number>)?.der_mrq || 0).toFixed(2)),
+        divYield: Number((((res.query_values as Record<string, number>)?.yield_ttm || 0) * 100).toFixed(2)),
+        marketCap: (res.query_values as Record<string, number>)?.market_cap ? ((res.query_values as Record<string, number>).market_cap / 1000000000000).toFixed(2) : "0"
+      }));
+      return { stocks, credits };
+    } catch (error) {
+      await refundCredit(userId);
+      throw error;
+    }
+  });
+
+
+const getAiRecommendedFiltersFn = createServerFn({ method: "POST" })
+  .handler(async () => {
+    const { userId, consumeCredit, refundCredit } = await getCreditContext();
+    const credits = await consumeCredit(userId);
+    try {
+      const { generateGeminiResponse } = await import("@/services/ai.service.server");
+      const prompt = `Sebagai pakar investasi saham di Bursa Efek Indonesia (IDX), berikan rekomendasi filter screener terbaik hari ini untuk strategi Value Investing (mencari saham salah harga yang fundamentalnya bagus). 
+Hanya kembalikan JSON object yang valid tanpa markdown apapun.
+Format: {"per": angka_maksimal, "pbv": angka_maksimal, "roe": angka_minimal, "der": angka_maksimal, "yield": angka_minimal}
+Contoh: {"per": 10, "pbv": 1.2, "roe": 15, "der": 1, "yield": 4}`;
+      const response = await generateGeminiResponse([{ role: "user", content: prompt }]);
+      const cleanJson = response.replace(/```json/gi, "").replace(/```/g, "").trim();
+      return { filters: JSON.parse(cleanJson), credits };
+    } catch (error) {
+      await refundCredit(userId);
+      throw error;
+    }
+  });
+
+
+const getScreenerInsightFn = createServerFn({ method: "POST" })
+  .validator((stocks: Array<Record<string, unknown>>) => stocks)
+  .handler(async ({ data: stocks }) => {
+    if (stocks.length === 0)
+      return { insight: "Tidak ada saham yang memenuhi kriteria untuk dianalisis.", credits: null };
+    const { userId, consumeCredit, refundCredit } = await getCreditContext();
+    const credits = await consumeCredit(userId);
+    try {
+      const { generateGeminiResponse } = await import("@/services/ai.service.server");
+      const prompt = `Berikut adalah hasil saham dari screener valuasi: ${JSON.stringify(stocks.slice(0, 10))}. Berikan insight analitis yang sangat singkat dan profesional (maksimal 2 paragraf pendek) mengenai daftar saham ini dan apakah sektornya menarik.`;
+      const response = await generateGeminiResponse([{ role: "user", content: prompt }]);
+      return { insight: response, credits };
+    } catch (error) {
+      await refundCredit(userId);
+      throw error;
+    }
+  });
 
 export const Route = createFileRoute("/_protected/valuation")({
   head: () => ({ meta: [{ title: `Valuation Screener | ${siteConfig.name}` }] }),
@@ -16,73 +101,84 @@ function ValuationPage() {
   const [maxDer, setMaxDer] = useState<number | "">(1.5);
   const [minYield, setMinYield] = useState<number | "">(0);
   const [minMarketCap, setMinMarketCap] = useState<number | "">(1); // in Trillions
+  const [preset, setPreset] = useState<string>("bigbank");
   const [isSearching, setIsSearching] = useState(false);
-  const [stocks, setStocks] = useState<any[]>([]);
+  const [stocks, setStocks] = useState<Array<{
+    ticker: string;
+    name: string;
+    price: number;
+    sector: string;
+    per: number;
+    pbv: number;
+    roe: number;
+    der: number;
+    divYield: number;
+    marketCap: string;
+  }>>([]);
   const [hasSearched, setHasSearched] = useState(false);
 
   const [aiResponse, setAiResponse] = useState<string | null>(null);
   const [isAiLoading, setIsAiLoading] = useState(false);
-  
-  // Cache untuk menyimpan hasil pencarian sebelumnya (menghemat hit API)
-  const queryCache = useRef<Record<string, any[]>>({});
+  const [isAiSetting, setIsAiSetting] = useState(false);
+  const [quotaError, setQuotaError] = useState(false);
 
+  const handleAutoSetAi = async () => {
+    setIsAiSetting(true);
+    setQuotaError(false);
+    try {
+      const { filters } = await getAiRecommendedFiltersFn();
+      const { per, pbv, roe, der, yield: divYield } = filters;
+      const newActive: string[] = [];
+      if (per !== undefined) { setMaxPer(per); newActive.push("per"); }
+      if (pbv !== undefined) { setMaxPbv(pbv); newActive.push("pbv"); }
+      if (roe !== undefined) { setMinRoe(roe); newActive.push("roe"); }
+      if (der !== undefined) { setMaxDer(der); newActive.push("der"); }
+      if (divYield !== undefined) { setMinYield(divYield); newActive.push("yield"); }
+      setActiveFilters(newActive);
+      window.dispatchEvent(new Event("nexus:credits-updated"));
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("INSUFFICIENT_CREDITS"))
+        setQuotaError(true);
+    } finally {
+      setIsAiSetting(false);
+    }
+  };
+  
   const fetchStocks = async () => {
     setIsSearching(true);
     setHasSearched(true);
     setAiResponse(null);
-    
+    setQuotaError(false);
     try {
-      const conditions = [];
+      const conditions: string[] = [];
       if (activeFilters.includes('per')) conditions.push(`pe_ttm ${maxPer !== "" ? "<= " + maxPer : "> -9999"}`);
       if (activeFilters.includes('pbv')) conditions.push(`pb_mrq ${maxPbv !== "" ? "<= " + maxPbv : "> -9999"}`);
       if (activeFilters.includes('roe')) conditions.push(`roe_ttm ${minRoe !== "" ? ">= " + (Number(minRoe) / 100) : "> -9999"}`);
       if (activeFilters.includes('der')) conditions.push(`der_mrq ${maxDer !== "" ? "<= " + maxDer : "> -9999"}`);
       if (activeFilters.includes('yield')) conditions.push(`yield_ttm ${minYield !== "" ? ">= " + (Number(minYield) / 100) : ">= 0"}`);
-      if (activeFilters.includes('marketcap')) {
-        if (minMarketCap !== "") conditions.push(`market_cap >= ${Number(minMarketCap) * 1000000000000}`);
+      if (activeFilters.includes('marketcap') && minMarketCap !== "")
+        conditions.push(`market_cap >= ${Number(minMarketCap) * 1000000000000}`);
+      if (activeFilters.includes('preset')) {
+        if (preset === "bigbank") conditions.push(`symbol in ('BBCA.JK','BMRI.JK','BBRI.JK','BBNI.JK')`);
+        if (preset === "lq45") conditions.push(`symbol in ('ACES.JK','ADRO.JK','AKRA.JK','AMRT.JK','ANTM.JK','ARTO.JK','ASII.JK','BBCA.JK','BBNI.JK','BBRI.JK','BBTN.JK','BMRI.JK','BRPT.JK','BUKA.JK','CPIN.JK','EMTK.JK','ESSA.JK','EXCL.JK','GGRM.JK','GOTO.JK','HRUM.JK','ICBP.JK','INCO.JK','INDF.JK','INKP.JK','INTP.JK','ISAT.JK','ITMG.JK','KLBF.JK','MAPI.JK','MBMA.JK','MDKA.JK','MEDC.JK','MTEL.JK','PGAS.JK','PGEO.JK','PTBA.JK','SIDO.JK','SMGR.JK','SRTG.JK','TLKM.JK','TOWR.JK','TPIA.JK','UNTR.JK','UNVR.JK')`);
+        if (preset === "idx30") conditions.push(`symbol in ('ACES.JK','ADRO.JK','AKRA.JK','AMRT.JK','ANTM.JK','ARTO.JK','ASII.JK','BBCA.JK','BBNI.JK','BBRI.JK','BMRI.JK','BRPT.JK','BUKA.JK','CPIN.JK','EMTK.JK','EXCL.JK','GOTO.JK','HRUM.JK','ICBP.JK','INCO.JK','INDF.JK','INKP.JK','INTP.JK','ITMG.JK','KLBF.JK','MDKA.JK','PGAS.JK','PTBA.JK','SMGR.JK','TLKM.JK','TOWR.JK','UNTR.JK','UNVR.JK')`);
+        if (preset === "jii") conditions.push(`symbol in ('ACES.JK','ADRO.JK','AKRA.JK','AMRT.JK','ANTM.JK','BRPT.JK','CPIN.JK','EXCL.JK','HRUM.JK','ICBP.JK','INCO.JK','INDF.JK','INKP.JK','INTP.JK','ITMG.JK','KLBF.JK','MDKA.JK','PGAS.JK','PTBA.JK','SMGR.JK','TLKM.JK','TPIA.JK','UNTR.JK','UNVR.JK')`);
+        if (preset === "energy") conditions.push(`symbol in ('ADRO.JK','PTBA.JK','ITMG.JK','HRUM.JK','INDY.JK','BUMI.JK','ENRG.JK','MEDC.JK','PGEO.JK','PGAS.JK','AKRA.JK','BIPI.JK','DOID.JK','MBSS.JK')`);
+        if (preset === "consumer") conditions.push(`symbol in ('ICBP.JK','INDF.JK','UNVR.JK','MYOR.JK','SIDO.JK','CLEO.JK','GOOD.JK','GGRM.JK','HMSP.JK','KAEF.JK','KLBF.JK','TSPC.JK')`);
+        if (preset === "tech") conditions.push(`symbol in ('GOTO.JK','BUKA.JK','BELI.JK','EMTK.JK','WIRG.JK','MLPT.JK')`);
+        if (preset === "undervalue") conditions.push(`symbol in ('ASII.JK','UNTR.JK','BNGA.JK','NISP.JK','BDMN.JK','BJTM.JK','BJBR.JK','ITMG.JK','PTBA.JK','ADRO.JK','INDF.JK','AUTO.JK','SMSM.JK')`);
       }
-      
       conditions.push(`last_close_price > 0`);
       conditions.push(`sector != ''`);
-      
-      const whereQuery = conditions.join(" and ");
-      
-      // Cek apakah query ini sudah pernah dicari sebelumnya
-      if (queryCache.current[whereQuery]) {
-        // Jika ada di cache, gunakan data cache (TIDAK HIT API)
-        setStocks(queryCache.current[whereQuery]);
-        setIsSearching(false);
-        return;
-      }
 
-      const url = `https://api.sectors.app/v2/companies/?where=${encodeURIComponent(whereQuery)}&include_query_values=true&limit=10`;
-      
-      const response = await fetch(url, {
-        headers: {
-          Authorization: "ced24817315a288d530ac3dc65a2d871d86420ea14dcac64b5e8348319d0119b"
-        }
+      const { stocks: result } = await fetchScreenerStocksFn({
+        data: conditions.join(" and "),
       });
-      const data = await response.json();
-      
-      const mappedStocks = (data.results || []).map((res: any) => ({
-        ticker: res.symbol.split('.')[0],
-        name: res.company_name,
-        price: res.query_values.last_close_price,
-        sector: res.query_values.sector,
-        per: Number((res.query_values.pe_ttm || 0).toFixed(2)),
-        pbv: Number((res.query_values.pb_mrq || 0).toFixed(2)),
-        roe: Number(((res.query_values.roe_ttm || 0) * 100).toFixed(2)),
-        der: Number((res.query_values.der_mrq || 0).toFixed(2)),
-        divYield: Number(((res.query_values.yield_ttm || 0) * 100).toFixed(2)),
-        marketCap: res.query_values.market_cap ? (res.query_values.market_cap / 1000000000000).toFixed(2) : "0"
-      }));
-      
-      // Simpan hasil ke dalam cache
-      queryCache.current[whereQuery] = mappedStocks;
-      setStocks(mappedStocks);
-      
+      setStocks(result);
+      window.dispatchEvent(new Event("nexus:credits-updated"));
     } catch (error) {
-      console.error("Failed to fetch stocks:", error);
+      if (error instanceof Error && error.message.includes("INSUFFICIENT_CREDITS"))
+        setQuotaError(true);
     } finally {
       setIsSearching(false);
     }
@@ -93,7 +189,7 @@ function ValuationPage() {
     fetchStocks();
   };
 
-  const availableFilters = ['per', 'pbv', 'roe', 'der', 'yield', 'marketcap'].filter(f => !activeFilters.includes(f));
+  const availableFilters = ['per', 'pbv', 'roe', 'der', 'yield', 'marketcap', 'preset'].filter(f => !activeFilters.includes(f));
 
   const onDragStart = (e: React.DragEvent, id: string) => {
     e.dataTransfer.setData("id", id);
@@ -114,14 +210,21 @@ function ValuationPage() {
     setActiveFilters(activeFilters.filter(f => f !== id));
   };
 
-  const handleAskAi = () => {
+  const handleAskAi = async () => {
     setIsAiLoading(true);
     setAiResponse(null);
-    setTimeout(() => {
-      const sector = stocks.length > 0 ? stocks[0].sector : "Teknologi";
-      setAiResponse(`Berdasarkan hasil screener Anda, saham-saham ini tergolong undervalued secara valuasi (PER & PBV rendah). Sektor ${sector} terlihat menarik untuk dikaji lebih lanjut karena metrik fundamentalnya yang solid. Namun, selalu periksa tren pertumbuhan laba sebelum berinvestasi.`);
+    setQuotaError(false);
+    try {
+      const { insight } = await getScreenerInsightFn({ data: stocks });
+      setAiResponse(insight);
+      window.dispatchEvent(new Event("nexus:credits-updated"));
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("INSUFFICIENT_CREDITS"))
+        setQuotaError(true);
+      else setAiResponse("Gagal mengambil insight dari AI.");
+    } finally {
       setIsAiLoading(false);
-    }, 2000);
+    }
   };
 
   return (
@@ -136,11 +239,38 @@ function ValuationPage() {
         </div>
       </div>
 
+      {quotaError && (
+        <div className="flex flex-col items-center justify-between gap-3 rounded-xl border border-brand-500/25 bg-brand-500/5 p-4 sm:flex-row">
+          <p className="text-sm text-gray-300">Saldo credit habis. Pilih paket untuk melanjutkan memakai Screener.</p>
+          <Link
+            to="/billing"
+            className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-bold text-dark-950 hover:bg-brand-400"
+          >
+            Top Up
+          </Link>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 relative">
         {/* Input Parameters (Left Side) - 4 cols */}
         <div className="lg:col-span-4 sticky top-6 self-start space-y-6">
           
+          
+          {/* AI Auto-Set */}
+          <button
+            onClick={handleAutoSetAi}
+            disabled={isAiSetting}
+            className="w-full bg-gradient-to-r from-brand-600 to-orange-500 hover:from-brand-500 hover:to-orange-400 text-white font-bold py-3 px-4 rounded-xl transition-all flex justify-center items-center gap-2 shadow-[0_0_15px_rgba(255,122,0,0.3)] active:scale-[0.98] disabled:opacity-70"
+          >
+            {isAiSetting ? (
+               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+            ) : (
+               <><Sparkles className="size-4" /> AI Smart Filter</>
+            )}
+          </button>
+
           {/* Available Filters */}
+
           <div className="bg-dark-900 border border-dark-800 rounded-xl p-5 shadow-sm">
             <h3 className="text-sm font-semibold text-white mb-3">Available Filters</h3>
             <div className="flex flex-wrap gap-2">
@@ -331,6 +461,34 @@ function ValuationPage() {
                 </div>
               )}
 
+              {activeFilters.includes('preset') && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-400 mb-1.5 flex justify-between items-center">
+                    <span>Preset Kumpulan Saham</span>
+                    <button type="button" onClick={() => removeFilter('preset')} className="text-gray-500 hover:text-red-400 p-0.5 rounded hover:bg-dark-800 transition-colors">
+                      <X className="size-3.5" />
+                    </button>
+                  </label>
+                  <select 
+                    value={preset}
+                    onChange={(e) => setPreset(e.target.value)}
+                    className="block w-full px-4 py-2.5 border border-dark-700 rounded-lg bg-dark-950 text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-brand-500 focus:border-brand-500 sm:text-sm transition-colors hover:border-dark-600 appearance-none"
+                  >
+                    <option value="bigbank">Top 4 Big Banks</option>
+                    <option value="lq45">Indeks LQ45</option>
+                    <option value="idx30">Indeks IDX30</option>
+                    <option value="jii">Jakarta Islamic Index (JII)</option>
+                    <option value="energy">Sektor Energi & Tambang</option>
+                    <option value="consumer">Sektor Consumer Goods</option>
+                    <option value="tech">Sektor Teknologi</option>
+                    <option value="undervalue">Pilihan Saham Undervalue</option>
+                  </select>
+                  <p className="text-[10px] text-gray-500 mt-1.5 leading-relaxed">
+                    Saring berdasarkan daftar saham pilihan.
+                  </p>
+                </div>
+              )}
+
               <div className="pt-2">
                 <button 
                   type="submit"
@@ -413,7 +571,7 @@ function ValuationPage() {
             </div>
           ) : !hasSearched ? (
             <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-dark-900 border border-dark-800 rounded-xl border-dashed">
-              <TrendingUp className="size-10 text-gray-600 mb-4" />
+              <Search className="size-10 text-gray-600 mb-4" />
               <h3 className="text-lg font-medium text-white mb-2">Ready to screen</h3>
               <p className="text-sm text-gray-500 max-w-sm">
                 Adjust your valuation parameters on the left and click "Find Matching Stocks" to begin scanning the market.
@@ -433,8 +591,13 @@ function ValuationPage() {
                     </span>
                   </div>
                   
-                  <div className="flex items-baseline gap-2 mb-4">
+                  <div className="mb-4 flex items-end justify-between gap-3">
                     <span className="text-2xl font-bold text-white">Rp {stock.price.toLocaleString("id-ID")}</span>
+                    <AddToWatchlistButton
+                      symbol={stock.ticker}
+                      companyName={stock.name}
+                      currentPrice={stock.price}
+                    />
                   </div>
 
                   <div className="grid grid-cols-3 gap-3">

@@ -1,22 +1,55 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useRef, useEffect } from "react";
-import { ArrowUp, Brain, Plus, Sparkles } from "lucide-react";
+import { ArrowUp, Brain, Plus, Sparkles, Coins } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createServerFn } from "@tanstack/react-start";
-import { generateGeminiResponse } from "@/services/ai.service.server";
+import { getRequestHeaders } from "@tanstack/react-start/server";
 import ReactMarkdown from "react-markdown";
 
 const askGeminiFn = createServerFn({ method: 'POST' })
   .validator((data: {role: string, content: string}[]) => data)
   .handler(async ({ data }) => {
-    return await generateGeminiResponse(data);
+    const [{ getSession }, { consumeCredit, refundCredit }, { generateGeminiResponse }] =
+      await Promise.all([
+        import("@/lib/session.server"),
+        import("@/services/credit.service.server"),
+        import("@/services/ai.service.server"),
+      ]);
+    const headers = getRequestHeaders() as unknown as Headers;
+    const session = await getSession(headers);
+    if (!session) throw new Error("Unauthorized");
+
+    const credits = await consumeCredit(session.user.id);
+    try {
+      const response = await generateGeminiResponse(data);
+      return { response, credits };
+    } catch (error) {
+      await refundCredit(session.user.id);
+      throw error;
+    }
+  });
+
+const getCreditsFn = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const [{ getSession }, { getCreditBalance }] = await Promise.all([
+      import("@/lib/session.server"),
+      import("@/services/credit.service.server"),
+    ]);
+    const headers = getRequestHeaders() as unknown as Headers;
+    const session = await getSession(headers);
+    return session ? getCreditBalance(session.user.id) : 0;
   });
 
 export const Route = createFileRoute("/_protected/assistant")({
+  loader: async () => ({
+    credits: await getCreditsFn()
+  }),
   component: AssistantPage,
 });
 
 function AssistantPage() {
+  const { credits: initialCredits } = Route.useLoaderData();
+  const [credits, setCredits] = useState(initialCredits);
   const [value, setValue] = useState("");
   const [thinking, setThinking] = useState(false);
   const [messages, setMessages] = useState<{role: 'user' | 'assistant', content: string}[]>([]);
@@ -39,11 +72,19 @@ function AssistantPage() {
     setThinking(true);
     
     try {
-      const response = await askGeminiFn({ data: newMessages });
+      const { response, credits: remainingCredits } = await askGeminiFn({
+        data: newMessages,
+      });
       setMessages(prev => [...prev, { role: 'assistant', content: response }]);
+      setCredits(remainingCredits);
+      window.dispatchEvent(new Event("nexus:credits-updated"));
     } catch (err) {
       console.error(err);
-      setMessages(prev => [...prev, { role: 'assistant', content: "Maaf, terjadi kesalahan saat menghubungi AI. Pastikan API key sudah terkonfigurasi dengan benar." }]);
+      if (err instanceof Error && err.message.includes("INSUFFICIENT_CREDITS")) {
+        setMessages(prev => [...prev, { role: 'assistant', content: "⚠️ **Token Anda habis!**\n\nAnda telah menggunakan seluruh token gratis. Silakan lakukan **Top-Up Payment** untuk melanjutkan chat dengan Nexus Assistant." }]);
+      } else {
+        setMessages(prev => [...prev, { role: 'assistant', content: "Maaf, terjadi kesalahan saat menghubungi AI. Pastikan API key sudah terkonfigurasi dengan benar." }]);
+      }
     } finally {
       setThinking(false);
     }
@@ -141,6 +182,20 @@ function AssistantPage() {
 
       {/* Input Area */}
       <div className="mx-auto w-full max-w-3xl pb-4 px-4 sm:px-0 bg-transparent pt-4">
+        {credits <= 0 && (
+          <div className="mb-4 flex flex-col items-center justify-between gap-3 rounded-xl border border-brand-500/25 bg-brand-500/5 p-4 text-center sm:flex-row sm:text-left">
+            <div>
+              <p className="text-sm font-semibold text-white">Credit sudah habis</p>
+              <p className="mt-1 text-xs text-gray-400">Top up untuk memakai Assistant, Research, dan Screener kembali.</p>
+            </div>
+            <Link
+              to="/billing"
+              className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-bold text-dark-950 hover:bg-brand-400"
+            >
+              Top Up
+            </Link>
+          </div>
+        )}
         <div className="flex items-center gap-2 rounded-2xl border border-dark-700 bg-dark-900/80 backdrop-blur-md px-3 py-2 shadow-xl transition-all focus-within:border-brand-500 focus-within:ring-1 focus-within:ring-brand-500">
           <button
             type="button"
@@ -160,7 +215,7 @@ function AssistantPage() {
           />
           <button
             type="button"
-            disabled={!value.trim() || thinking}
+            disabled={!value.trim() || thinking || credits <= 0}
             onClick={handleSend}
             className="rounded-full bg-brand-500 p-2 text-dark-950 transition-colors hover:bg-brand-400 disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Kirim"
@@ -168,9 +223,15 @@ function AssistantPage() {
             <ArrowUp className="size-5" />
           </button>
         </div>
-        <p className="mt-3 text-center text-xs text-gray-600">
-          Nexus Assistant dapat membuat kesalahan. Harap verifikasi info penting.
-        </p>
+        <div className="mt-3 flex justify-between items-center px-2">
+          <p className="text-xs text-gray-600">
+            Nexus Assistant dapat membuat kesalahan. Harap verifikasi info penting.
+          </p>
+          <div className="flex items-center gap-1.5 bg-dark-900 border border-dark-800 px-3 py-1 rounded-full">
+            <Coins className="size-3.5 text-brand-500" />
+            <span className="text-xs font-semibold text-gray-300">{credits} Token Tersisa</span>
+          </div>
+        </div>
       </div>
     </div>
   );

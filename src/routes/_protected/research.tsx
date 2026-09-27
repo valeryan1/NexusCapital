@@ -14,7 +14,7 @@ import {
   ArrowRightLeft,
   Briefcase
 } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { 
   Tooltip as RechartsTooltip, 
   ResponsiveContainer,
@@ -31,12 +31,30 @@ import {
 import { NexusScoreGauge } from "@/components/nexus-score-gauge";
 import { Sparkles, Loader2 } from "lucide-react";
 import { createServerFn } from "@tanstack/react-start";
-import { generateResearchReport } from "@/services/research.service.server";
+import { getRequestHeaders } from "@tanstack/react-start/server";
+import { AddToWatchlistButton } from "@/components/add-to-watchlist-button";
 
 const generateReportFn = createServerFn({ method: 'POST' })
   .validator((ticker: string) => ticker)
   .handler(async ({ data }) => {
-    return await generateResearchReport(data);
+    const [{ getSession }, { consumeCredit, refundCredit }, { generateResearchReport }] =
+      await Promise.all([
+        import("@/lib/session.server"),
+        import("@/services/credit.service.server"),
+        import("@/services/research.service.server"),
+      ]);
+    const session = await getSession(
+      getRequestHeaders() as unknown as Headers,
+    );
+    if (!session) throw new Error("Unauthorized");
+    const credits = await consumeCredit(session.user.id);
+    try {
+      const report = await generateResearchReport(data);
+      return { report, credits };
+    } catch (error) {
+      await refundCredit(session.user.id);
+      throw error;
+    }
   });
 
 export const Route = createFileRoute("/_protected/research")({
@@ -136,14 +154,17 @@ function ResearchStudio() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const autoRunRef = useRef(search.auto);
 
-  const handleGenerate = async (targetTicker?: string) => {
+  const handleGenerate = useCallback(async (targetTicker?: string) => {
     const t = typeof targetTicker === 'string' ? targetTicker : tickerInput;
     if (!t.trim() || isLoading) return;
     setIsLoading(true);
     setErrorMsg(null);
     try {
-      const result = await generateReportFn({ data: t.toUpperCase() });
-      setData(result);
+      const { report } = await generateReportFn({
+        data: t.toUpperCase(),
+      });
+      setData(report);
+      window.dispatchEvent(new Event("nexus:credits-updated"));
     } catch (error: unknown) {
       console.error(error);
       const msg = error instanceof Error ? error.message : "Gagal menghubungi AI Server (Kemungkinan Server Google Gemini sedang sibuk/overload). Silakan coba lagi.";
@@ -151,14 +172,14 @@ function ResearchStudio() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [isLoading, tickerInput]);
 
   useEffect(() => {
     if (autoRunRef.current && search.q) {
       handleGenerate(search.q);
       autoRunRef.current = false;
     }
-  }, [search.q]);
+  }, [handleGenerate, search.q]);
 
   return (
     <div className="view-section animate-fade-in max-w-7xl mx-auto space-y-6 pb-12 relative">
@@ -219,7 +240,12 @@ function ResearchStudio() {
             <TrendingUp className="size-4" /> {data.priceChange}
           </div>
         </div>
-        <div className="shrink-0 ml-auto md:ml-4">
+        <div className="flex shrink-0 flex-col items-stretch gap-2 sm:flex-row md:ml-4">
+          <AddToWatchlistButton
+            symbol={data.ticker}
+            companyName={data.companyName}
+            currentPrice={data.currentPrice}
+          />
           <button 
             onClick={() => handleGenerate()}
             disabled={isLoading}

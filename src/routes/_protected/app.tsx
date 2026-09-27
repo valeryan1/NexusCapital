@@ -9,19 +9,46 @@ import {
   Radar, 
   Brain, 
   Server, 
-  Flame 
+  Flame,
+  TrendingDown
 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/react-start";
+import { getTrendingStocks } from "@/services/sectors.service.server";
+
+const fetchDashboardStatsFn = createServerFn({ method: "GET" })
+  .handler(async () => {
+    try {
+      const stocks = await getTrendingStocks();
+      return { stocks };
+    } catch (error) {
+      console.error(error);
+      return { stocks: [] };
+    }
+  });
 
 export const Route = createFileRoute("/_protected/app")({
   head: () => ({ meta: [{ title: `Overview | ${siteConfig.name}` }] }),
+  loader: async () => {
+    return await fetchDashboardStatsFn();
+  },
   component: OverviewPage,
 });
+
+const getScore = (change: number) => {
+  const percentage = change * 100;
+  if (percentage > 5) return { score: 95, label: "Strong Bull", textClass: "text-semantic-bull", bgClass: "bg-semantic-bull", badgeClass: "text-semantic-bull bg-semantic-bull/10 border-semantic-bull/20" };
+  if (percentage > 0) return { score: 70 + Math.min(20, Math.floor(percentage * 5)), label: "Bull", textClass: "text-semantic-bull", bgClass: "bg-semantic-bull", badgeClass: "text-semantic-bull bg-semantic-bull/10 border-semantic-bull/20" };
+  if (percentage < -5) return { score: 15, label: "Strong Bear", textClass: "text-semantic-bear", bgClass: "bg-semantic-bear", badgeClass: "text-semantic-bear bg-semantic-bear/10 border-semantic-bear/20" };
+  if (percentage < 0) return { score: 45 + Math.max(-30, Math.floor(percentage * 5)), label: "Bear", textClass: "text-semantic-bear", bgClass: "bg-semantic-bear", badgeClass: "text-semantic-bear bg-semantic-bear/10 border-semantic-bear/20" };
+  return { score: 50, label: "Neutral", textClass: "text-semantic-info", bgClass: "bg-semantic-info", badgeClass: "text-semantic-info bg-semantic-info/10 border-semantic-info/20" };
+};
 
 function OverviewPage() {
   const navigate = useNavigate();
   const [ticker, setTicker] = useState("");
+  const { stocks } = Route.useLoaderData();
 
   const handleRunAgents = () => {
     if (!ticker.trim()) return;
@@ -32,7 +59,7 @@ function OverviewPage() {
   };
 
   return (
-    <div className="view-section animate-fade-in max-w-7xl mx-auto space-y-6">
+    <div className="view-section animate-fade-in max-w-7xl mx-auto space-y-6 pb-12">
       {/* Hero AI Prompt Section */}
       <div className="relative rounded-2xl p-1 bg-gradient-to-r from-dark-800 via-brand-500/20 to-dark-800 shadow-2xl animate-glow">
         <div className="bg-dark-900 rounded-xl p-6 sm:p-8 border border-dark-800 relative overflow-hidden bg-grid-pattern">
@@ -112,7 +139,7 @@ function OverviewPage() {
             <p className="text-sm font-medium text-gray-400">Reports Generated</p>
             <div className="flex items-end gap-3 mt-2">
               <h3 className="text-3xl font-bold text-white">348</h3>
-              <span className="flex items-center gap-1 text-sm font-medium text-semantic-bull mb-1 bg-semantic-bull/10 px-1.5 py-0.5 rounded">
+              <span className="flex items-center gap-1 text-sm font-medium text-semantic-bull mb-1 bg-semantic-bull/10 px-1.5 py-0.5 rounded border border-semantic-bull/20">
                 <TrendingUp className="size-3" /> +12%
               </span>
             </div>
@@ -157,102 +184,91 @@ function OverviewPage() {
               <Brain className="size-5" />
             </div>
           </div>
-          <div className="flex items-center gap-2 mt-4 text-xs text-gray-500">
-            <Server className="size-4 text-dark-700" /> GPT-4o & Claude 3.5 Active
+          <div className="flex items-center gap-2 mt-4 text-xs text-gray-500 bg-dark-950 px-2 py-1.5 rounded border border-dark-800">
+            <Server className="size-3.5 text-brand-500" /> GPT-4o & Claude 3.5
           </div>
         </div>
       </div>
 
       {/* NEW SECTION: Trending & Live Logs */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
         
         {/* Trending Analyses Table */}
-        <div className="lg:col-span-2 bg-dark-900 border border-dark-800 rounded-xl overflow-hidden flex flex-col">
-          <div className="px-6 py-4 border-b border-dark-800 flex justify-between items-center bg-dark-900/50">
+        <div className="lg:col-span-2 bg-dark-900 border border-dark-800 rounded-xl overflow-hidden flex flex-col shadow-lg">
+          <div className="px-6 py-4 border-b border-dark-800 flex justify-between items-center bg-dark-950">
             <h3 className="text-white font-semibold flex items-center gap-2">
-              <Flame className="size-4 text-brand-500" /> Trending AI Analyses
+              <Flame className="size-4 text-brand-500" /> Market Pulse & AI Sentiment
             </h3>
-            <button className="text-xs text-brand-500 hover:text-brand-400 font-medium">View All</button>
+            <span className="text-xs text-brand-500 bg-brand-500/10 px-2 py-1 rounded font-medium border border-brand-500/20">Live</span>
           </div>
           <div className="overflow-x-auto flex-1">
             <table className="min-w-full divide-y divide-dark-800">
-              <thead className="bg-dark-950/30">
+              <thead className="bg-dark-900/50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Ticker</th>
-                  <th className="px-6 py-3 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Nexus Score</th>
-                  <th className="px-6 py-3 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider">AI Sentiment</th>
-                  <th className="px-6 py-3 text-right text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Time</th>
+                  <th className="px-6 py-3 text-left text-[10px] sm:text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Ticker</th>
+                  <th className="px-6 py-3 text-left text-[10px] sm:text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Price & Change</th>
+                  <th className="px-6 py-3 text-left text-[10px] sm:text-[11px] font-semibold text-gray-500 uppercase tracking-wider">AI Score</th>
+                  <th className="px-6 py-3 text-right text-[10px] sm:text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-dark-800">
-                <tr className="hover:bg-dark-800/50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded bg-dark-950 border border-dark-700 flex items-center justify-center text-xs font-bold text-white">BREN</div>
-                      <div className="text-sm text-gray-400">Barito Renewables</div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-2">
-                      <div className="text-lg font-bold text-semantic-bull">88</div>
-                      <div className="w-16 h-1.5 bg-dark-950 rounded-full overflow-hidden border border-dark-800">
-                        <div className="bg-semantic-bull h-full rounded-full" style={{ width: '88%' }}></div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-semantic-bull text-xs bg-semantic-bull/10 px-2.5 py-1 rounded border border-semantic-bull/20 font-medium">Strong Bull</span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500">2 mins ago</td>
-                </tr>
-                <tr className="hover:bg-dark-800/50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded bg-dark-950 border border-dark-700 flex items-center justify-center text-xs font-bold text-white">GOTO</div>
-                      <div className="text-sm text-gray-400">GoTo Gojek Tokopedia</div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-2">
-                      <div className="text-lg font-bold text-semantic-bear">34</div>
-                      <div className="w-16 h-1.5 bg-dark-950 rounded-full overflow-hidden border border-dark-800">
-                        <div className="bg-semantic-bear h-full rounded-full" style={{ width: '34%' }}></div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-semantic-bear text-xs bg-semantic-bear/10 px-2.5 py-1 rounded border border-semantic-bear/20 font-medium">Bearish</span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500">15 mins ago</td>
-                </tr>
-                <tr className="hover:bg-dark-800/50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded bg-dark-950 border border-dark-700 flex items-center justify-center text-xs font-bold text-white">AMMN</div>
-                      <div className="text-sm text-gray-400">Amman Mineral</div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-2">
-                      <div className="text-lg font-bold text-semantic-info">65</div>
-                      <div className="w-16 h-1.5 bg-dark-950 rounded-full overflow-hidden border border-dark-800">
-                        <div className="bg-semantic-info h-full rounded-full" style={{ width: '65%' }}></div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-semantic-info text-xs bg-semantic-info/10 px-2.5 py-1 rounded border border-semantic-info/20 font-medium">Neutral</span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500">1 hr ago</td>
-                </tr>
+                {stocks.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-12 text-center text-sm text-gray-500">
+                      Memuat data pasar real-time...
+                    </td>
+                  </tr>
+                ) : (
+                  stocks.map((stock: { ticker: string; name: string; price: number; change: number }) => {
+                    const { score, label, textClass, bgClass, badgeClass } = getScore(stock.change);
+                    const isPositive = stock.change >= 0;
+                    
+                    return (
+                      <tr key={stock.ticker} className="hover:bg-dark-800/60 transition-colors group">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-dark-950 border border-dark-700 flex items-center justify-center text-xs font-bold text-white group-hover:border-brand-500/50 transition-colors">
+                              {stock.ticker}
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-sm text-gray-200 font-bold truncate max-w-[120px] sm:max-w-[200px]">{stock.name}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex flex-col">
+                            <span className="text-sm font-bold text-white font-mono">Rp {stock.price.toLocaleString("id-ID")}</span>
+                            <span className={`text-xs font-bold flex items-center gap-1 ${isPositive ? 'text-semantic-bull' : 'text-semantic-bear'}`}>
+                              {isPositive ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
+                              {(stock.change * 100).toFixed(2)}%
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center gap-3">
+                            <div className={`text-lg font-bold ${textClass}`}>{score}</div>
+                            <div className="w-16 h-1.5 bg-dark-950 rounded-full overflow-hidden border border-dark-700">
+                              <div className={`h-full rounded-full ${bgClass}`} style={{ width: `${score}%` }}></div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right">
+                          <span className={`text-[10px] sm:text-xs px-2.5 py-1 rounded font-bold uppercase tracking-wider ${badgeClass}`}>
+                            {label}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>
         </div>
 
         {/* Live Swarm Activity (Terminal Style) */}
-        <div className="lg:col-span-1 bg-dark-950 border border-dark-800 rounded-xl overflow-hidden flex flex-col relative group">
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-brand-500/5 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <div className="lg:col-span-1 bg-dark-950 border border-dark-800 rounded-xl overflow-hidden flex flex-col relative shadow-lg">
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-brand-500/5 pointer-events-none opacity-100"></div>
           <div className="px-4 py-3 border-b border-dark-800 flex justify-between items-center bg-dark-900">
             <h3 className="text-gray-300 text-xs font-mono uppercase tracking-wider flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></div>
@@ -260,24 +276,27 @@ function OverviewPage() {
             </h3>
             <Terminal className="text-dark-700 size-4" />
           </div>
-          <div className="flex-1 p-4 font-mono text-[10px] sm:text-xs space-y-3 overflow-y-auto max-h-[250px]">
-            <div className="text-gray-500">
-              <span className="text-dark-700">[10:42:01]</span> <span className="text-emerald-400">SYS:</span> Micro-report trigger evaluated for WIFI.
+          <div className="flex-1 p-5 font-mono text-[11px] sm:text-xs space-y-4 overflow-y-auto max-h-[350px]">
+            <div className="text-gray-400">
+              <span className="text-dark-600">[10:42:01]</span> <span className="text-emerald-400 font-bold">SYS:</span> Micro-report trigger evaluated for <span className="text-white font-bold">WIFI</span>.
             </div>
-            <div className="text-gray-500">
-              <span className="text-dark-700">[10:43:15]</span> <span className="text-blue-400">AGT-F:</span> Fetching Q3 balance sheet for <span className="text-white">BREN</span>...
+            <div className="text-gray-400">
+              <span className="text-dark-600">[10:43:15]</span> <span className="text-blue-400 font-bold">AGT-F:</span> Fetching Q3 balance sheet for <span className="text-white font-bold">BBCA</span>...
             </div>
-            <div className="text-gray-500">
-              <span className="text-dark-700">[10:43:16]</span> <span className="text-purple-400">AGT-T:</span> Analyzing volume profile (30d) for <span className="text-white">BREN</span>...
+            <div className="text-gray-400">
+              <span className="text-dark-600">[10:43:16]</span> <span className="text-purple-400 font-bold">AGT-T:</span> Analyzing volume profile (30d) for <span className="text-white font-bold">BBCA</span>...
             </div>
-            <div className="text-gray-500">
-              <span className="text-dark-700">[10:43:18]</span> <span className="text-brand-500">ORCH:</span> Synthesizing conflicting bias.
+            <div className="text-gray-400">
+              <span className="text-dark-600">[10:43:18]</span> <span className="text-brand-500 font-bold">ORCH:</span> Synthesizing conflicting bias.
             </div>
-            <div className="text-gray-500">
-              <span className="text-dark-700">[10:43:20]</span> <span className="text-emerald-400">SYS:</span> PDF Generated. Tokens used: 4,102.
+            <div className="text-gray-400">
+              <span className="text-dark-600">[10:43:20]</span> <span className="text-emerald-400 font-bold">SYS:</span> PDF Generated. Tokens used: 4,102.
             </div>
-            <div className="flex items-center gap-2 text-brand-500">
-              <span className="text-dark-700">[10:43:25]</span> Awaiting prompt <span className="w-1.5 h-3 bg-brand-500 animate-pulse"></span>
+            <div className="text-gray-400">
+              <span className="text-dark-600">[10:45:10]</span> <span className="text-blue-400 font-bold">AGT-F:</span> Fetching screener data for <span className="text-white font-bold">GOTO</span>.
+            </div>
+            <div className="flex items-center gap-2 text-brand-500 font-bold mt-4 pt-4 border-t border-dark-800/50">
+              <span className="text-dark-600 font-normal">[{new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}]</span> Awaiting prompt <span className="w-2 h-4 bg-brand-500 animate-pulse"></span>
             </div>
           </div>
         </div>

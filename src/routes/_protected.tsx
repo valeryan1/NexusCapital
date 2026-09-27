@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createFileRoute, Link, Outlet, redirect, useLocation } from "@tanstack/react-router";
 import { SignOutButton } from "@/components/sign-out-button";
 import { 
-  Bot, 
+  Bot,
+  Coins,
   Menu, 
   PieChart, 
   Settings, 
-  Zap, 
-  Code,
+  Zap,
+  Star,
   Bell,
   MoreVertical,
   ChevronLeft,
@@ -31,18 +32,87 @@ export const Route = createFileRoute("/_protected")({
 const navItemsWorkspace = [
   { id: "assistant", label: "Nexus Assistant", icon: Sparkles, path: "/assistant" },
   { id: "overview", label: "Overview", icon: PieChart, path: "/app" },
-  { id: "ipo", label: "IPO", icon: Landmark, path: "/ipo" },
   { id: "research", label: "Research Studio", icon: Bot, path: "/research" },
   { id: "valuation", label: "Valuation Screener", icon: Calculator, path: "/valuation" },
+  { id: "ipo", label: "IPO", icon: Landmark, path: "/ipo" },
   { id: "alerts", label: "Micro-Alerts", icon: Zap, path: "/alerts", badge: "3" },
 ];
 
 const navItemsIntegration = [
-  { id: "api", label: "API Gateway", icon: Code, path: "/api" },
+  { id: "watchlist", label: "Watchlist", icon: Star, path: "/watchlist" },
   { id: "billing", label: "Billing", icon: Settings, path: "/billing" },
 ];
 
+type WatchlistNotification = {
+  id: string;
+  kind: string;
+  symbol: string;
+  title: string;
+  body: string;
+  readAt: string | null;
+  createdAt: string;
+};
+
 function ProtectedLayout() {
+  const [notifications, setNotifications] = useState<WatchlistNotification[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [credits, setCredits] = useState<number | null>(null);
+  const unreadCount = notifications.filter((item) => !item.readAt).length;
+
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      try {
+        const response = await fetch("/api/watchlist/notifications");
+        const body = (await response.json().catch(() => null)) as {
+          data?: WatchlistNotification[];
+        } | null;
+        if (response.ok && active && body?.data) setNotifications(body.data);
+      } catch {
+        return;
+      }
+    };
+    void load();
+    const interval = window.setInterval(load, 60_000);
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      try {
+        const response = await fetch("/api/credits/");
+        const body = (await response.json().catch(() => null)) as {
+          data?: { credits?: number };
+        } | null;
+        if (response.ok && active && body?.data)
+          setCredits(body.data.credits ?? 0);
+      } catch {
+        return;
+      }
+    };
+    const refresh = () => void load();
+    void load();
+    window.addEventListener("nexus:credits-updated", refresh);
+    return () => {
+      active = false;
+      window.removeEventListener("nexus:credits-updated", refresh);
+    };
+  }, []);
+
+  const handleOpenNotifications = async () => {
+    const opening = !showNotifications;
+    setShowNotifications(opening);
+    if (!opening) return;
+    const readAt = new Date().toISOString();
+    setNotifications((items) =>
+      items.map((item) => ({ ...item, readAt: item.readAt ?? readAt })),
+    );
+    await fetch("/api/watchlist/notifications", { method: "PATCH" });
+  };
   const { user } = Route.useRouteContext().session;
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -195,7 +265,7 @@ function ProtectedLayout() {
         <div className="absolute top-[-10%] left-[25%] w-[50%] h-[40%] rounded-full bg-brand-500/10 blur-[120px] pointer-events-none"></div>
 
         {/* Header */}
-        <header className="h-16 flex-shrink-0 glass border-b border-dark-800 flex items-center justify-between px-4 sm:px-6 z-10 transition-all">
+        <header className="h-16 flex-shrink-0 glass border-b border-dark-800 flex items-center justify-between px-4 sm:px-6 z-40 transition-all">
           <div className="flex items-center gap-4">
             <button 
               className="md:hidden text-gray-400 hover:text-white focus:outline-none"
@@ -206,16 +276,95 @@ function ProtectedLayout() {
           </div>
 
           <div className="flex items-center gap-4">
+            {credits !== null && (
+              <Link
+                to="/billing"
+                className={cn(
+                  "hidden items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold sm:inline-flex",
+                  credits > 0
+                    ? "border-brand-500/20 bg-brand-500/10 text-brand-400 hover:bg-brand-500/20"
+                    : "border-semantic-bear/20 bg-semantic-bear/10 text-semantic-bear",
+                )}
+              >
+                <Coins className="size-3.5" />
+                {credits} credit
+              </Link>
+            )}
             {/* Status */}
             <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-semantic-bull/10 border border-semantic-bull/20 shadow-[0_0_10px_rgba(34,197,94,0.1)]">
               <div className="w-2 h-2 rounded-full bg-semantic-bull animate-pulse"></div>
               <span className="text-xs font-medium text-semantic-bull/80">Sectors API Connected</span>
             </div>
             <div className="h-6 w-px bg-dark-800 hidden md:block"></div>
-            <button className="relative text-gray-400 hover:text-brand-500 transition-colors">
+            <div className="relative">
+              <button 
+                onClick={handleOpenNotifications}
+                className="relative text-gray-400 hover:text-brand-500 transition-colors p-1"
+              >
               <Bell className="size-5" />
-              <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-brand-500 rounded-full border-2 border-background animate-pulse-slow"></span>
+              {unreadCount > 0 && (
+                  <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-brand-500 rounded-full border-2 border-background animate-ping"></span>
+                )}
+                {unreadCount > 0 && (
+                  <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-brand-500 rounded-full border-2 border-background"></span>
+                )}
             </button>
+
+              {/* Dropdown Notifications */}
+              {showNotifications && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-40" 
+                    onClick={() => setShowNotifications(false)}
+                  />
+                  <div className="absolute right-0 mt-2 w-80 bg-dark-900 border border-dark-800 rounded-xl shadow-xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2">
+                    <div className="p-3 border-b border-dark-800 flex justify-between items-center bg-dark-950">
+                      <h3 className="text-sm font-bold text-white">Notifikasi</h3>
+                      <span className="text-[10px] text-brand-500 bg-brand-500/10 px-2 py-0.5 rounded-full">{notifications.length} Pesan</span>
+                    </div>
+                    <div className="max-h-80 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="p-4 text-center text-sm text-gray-500">Tidak ada notifikasi</div>
+                      ) : (
+                        <div className="divide-y divide-dark-800">
+                          {notifications.map((notification) => (
+                            <Link
+                              key={notification.id}
+                              to="/research"
+                              search={{ q: notification.symbol }}
+                              onClick={() => setShowNotifications(false)}
+                              className={`block p-3 transition-colors hover:bg-dark-800/50 ${!notification.readAt ? "bg-brand-500/5" : ""}`}
+                            >
+                              <p className={`text-sm ${!notification.readAt ? "font-semibold text-white" : "text-gray-300"}`}>
+                                {notification.title}
+                              </p>
+                              <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-gray-400">
+                                {notification.body}
+                              </p>
+                              <p className="mt-1 text-[10px] text-gray-600">
+                                {new Intl.DateTimeFormat("id-ID", {
+                                  dateStyle: "medium",
+                                  timeStyle: "short",
+                                }).format(new Date(notification.createdAt))}
+                              </p>
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="border-t border-dark-800 bg-dark-950 p-2 text-center">
+                      <Link
+                        to="/watchlist"
+                        onClick={() => setShowNotifications(false)}
+                        className="text-xs text-brand-500 transition-colors hover:text-white"
+                      >
+                        Kelola Watchlist
+                      </Link>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </header>
 

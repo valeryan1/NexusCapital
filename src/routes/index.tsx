@@ -12,16 +12,17 @@ function LandingPage() {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 flex h-20 items-center border-b border-dark-800 glass px-6 transition-all duration-300">
         <div className="flex flex-1 items-center justify-between mx-auto max-w-7xl w-full">
-          <Link to="/" className="flex items-center gap-2 cursor-pointer group">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-500 to-orange-600 flex items-center justify-center text-white font-bold text-xl shadow-[0_0_15px_rgba(255,122,0,0.3)] group-hover:shadow-[0_0_25px_rgba(255,122,0,0.6)] transition-all">N</div>
-            <span className="font-bold text-xl text-white tracking-tight">Nexus<span className="text-brand-500">Capital</span></span>
+          <Link to="/" className="flex items-center cursor-pointer group">
+            <div className="w-[140px] h-[140px] -my-8 -ml-6 flex items-center justify-center transition-all group-hover:scale-105">
+              <img src="/logo.png" alt="NexusCapital" className="w-full h-full object-contain drop-shadow-md" />
+            </div>
           </Link>
           <nav className="flex items-center gap-4">
             <Button variant="ghost" asChild className="text-gray-300 hover:text-white hover:bg-dark-800 hidden sm:inline-flex">
               <Link to="/sign-in">Sign In</Link>
             </Button>
             <Button asChild className="bg-brand-500 text-dark-950 font-bold hover:bg-brand-400 shadow-[0_0_15px_rgba(255,122,0,0.4)]">
-              <Link to="/sign-up">Get Started</Link>
+              <Link to="/assistant">Get Started</Link>
             </Button>
           </nav>
         </div>
@@ -50,15 +51,29 @@ function LandingPage() {
             Democratizing financial intelligence. Transform raw Indonesian stock market data into comprehensive research, proprietary Nexus Scores, and automated micro-reports in <span className="text-white font-medium">~40 seconds</span>.
           </p>
           
-          <div className="flex flex-col items-center justify-center gap-4 sm:flex-row pt-4">
-            <Button size="lg" asChild className="h-14 px-8 text-base font-bold bg-brand-500 text-dark-950 hover:bg-brand-400 hover:scale-105 transition-transform shadow-[0_0_20px_rgba(255,122,0,0.4)]">
-              <Link to="/sign-up">
-                Access Terminal <ArrowRight className="ml-2 size-5" />
-              </Link>
-            </Button>
-            <Button size="lg" variant="outline" asChild className="h-14 px-8 text-base border-dark-700 bg-dark-900/50 hover:bg-dark-800 text-white backdrop-blur-sm transition-all hover:border-dark-600">
-              <a href="#architecture">View Architecture</a>
-            </Button>
+          {/* Guest Entry */}
+          <div className="w-full max-w-2xl mx-auto mt-8 text-left">
+            <Link
+              to="/assistant/guest"
+              className="group relative block"
+              aria-label="Buka Nexus Assistant tanpa login"
+            >
+              <div className="absolute -inset-1 bg-gradient-to-r from-brand-500 to-orange-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+              <div className="relative flex items-center gap-3 bg-dark-950 border border-dark-700 rounded-2xl p-3 shadow-2xl group-hover:border-brand-500/40">
+                <div className="size-9 shrink-0 rounded-full bg-brand-500 text-dark-950 flex items-center justify-center">
+                  <Sparkles className="size-4" />
+                </div>
+                <span className="flex-1 truncate text-sm text-white font-medium">
+                  Tanya Nexus AI tentang saham (1x percobaan gratis)
+                </span>
+                <span className="flex items-center gap-2 rounded-xl bg-brand-500 text-dark-950 font-bold px-4 py-2.5 transition-colors group-hover:bg-brand-400">
+                  Buka <ArrowRight className="size-4" />
+                </span>
+              </div>
+            </Link>
+            <p className="mt-3 text-center text-xs text-gray-500">
+              Gratis tanpa login sampai token pertama habis, lalu masuk akun untuk mendapatkan 5 token.
+            </p>
           </div>
         </div>
 

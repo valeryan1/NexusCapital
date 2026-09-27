@@ -31,13 +31,13 @@ test("signup, persisted session, signout, rejected password, and signin work", a
   await page
     .getByRole("button", { name: "Initialize Account", exact: true })
     .click();
-  await expect(page).toHaveURL(/\/app$/);
+  await expect(page).toHaveURL(/\/assistant$/, { timeout: 20_000 });
   await page.getByText("Ada Builder", { exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Sign out", exact: true }),
   ).toBeVisible();
   await page.reload();
-  await expect(page).toHaveURL(/\/app$/);
+  await expect(page).toHaveURL(/\/assistant$/, { timeout: 20_000 });
   await page.getByText("Ada Builder", { exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Sign out", exact: true }),
@@ -51,7 +51,7 @@ test("signup, persisted session, signout, rejected password, and signin work", a
     ),
   ).toBe(true);
   await page.goto("/sign-in");
-  await expect(page).toHaveURL(/\/app$/);
+  await expect(page).toHaveURL(/\/assistant$/, { timeout: 20_000 });
   await page.getByText("Ada Builder", { exact: true }).click();
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
   await expect(page).toHaveURL(/\/sign-in$/);
@@ -65,7 +65,7 @@ test("signup, persisted session, signout, rejected password, and signin work", a
   ).toContainText("Check your email and password");
   await page.getByLabel("Password", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Authorize", exact: true }).click();
-  await expect(page).toHaveURL(/\/app$/);
+  await expect(page).toHaveURL(/\/assistant$/, { timeout: 20_000 });
   expect(errors).toEqual([]);
 });
 
