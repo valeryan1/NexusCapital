@@ -39,7 +39,6 @@ export const Route = createFileRoute('/_protected/sectors/$sectorId')({
 })
 
 function SectorDashboard() {
-  const { sectorId } = Route.useParams()
   // In a real app, we'd fetch data based on sectorId. Using mock for now.
   const data = sectorData
 
