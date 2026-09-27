@@ -370,10 +370,10 @@ function FaqAccordionItem({ question, iconName, title, content, isOpen, onToggle
     <div className="border-b border-dark-800 last:border-b-0">
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between gap-4 py-4 px-4 text-left text-sm font-medium text-gray-400 hover:text-white transition-colors group"
+        className="w-full flex items-center justify-between gap-4 py-4 px-4 text-left text-sm font-medium text-gray-700 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors group"
       >
-        <span className={`transition-colors ${isOpen ? 'text-white' : ''}`}>{question}</span>
-        <ChevronDown className={`size-4 shrink-0 text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180 text-brand-500' : ''}`} />
+        <span className={`transition-colors ${isOpen ? 'text-gray-900 dark:text-white' : ''}`}>{question}</span>
+        <ChevronDown className={`size-4 shrink-0 text-gray-600 dark:text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180 text-brand-500' : ''}`} />
       </button>
       {isOpen && (
         <div className="px-4 pb-5 animate-in slide-in-from-top-2 duration-200">
@@ -495,7 +495,7 @@ function AiSynthesisPanel({ aiAnalysis, ticker }: { aiAnalysis: AiAnalysis; tick
   return (
     <div className="border-t border-dark-800 pt-8 pb-2 print-mb">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest">AI Synthesis &amp; Deep Dive</h2>
+        <h2 className="text-xs font-bold text-gray-900 dark:text-gray-500 uppercase tracking-widest">AI Synthesis &amp; Deep Dive</h2>
         <span className="text-[10px] font-bold text-brand-500 bg-brand-500/10 border border-brand-500/20 px-2 py-0.5 rounded uppercase tracking-widest">
           {ticker} · AI Orchestrator
         </span>
@@ -518,7 +518,7 @@ function AiSynthesisPanel({ aiAnalysis, ticker }: { aiAnalysis: AiAnalysis; tick
                   <p className={`text-[11px] font-bold uppercase tracking-widest mb-1 transition-colors ${isActive ? section.color : "text-gray-500 group-hover:text-gray-300"}`}>
                     {section.label}
                   </p>
-                  <p className="text-[12px] text-gray-600 group-hover:text-gray-500 truncate font-light transition-colors leading-relaxed">
+                  <p className="text-[12px] text-gray-700 dark:text-gray-600 group-hover:text-gray-800 dark:group-hover:text-gray-500 truncate font-light transition-colors leading-relaxed">
                     {section.getSnippet(aiAnalysis)}
                   </p>
                 </div>
@@ -543,12 +543,12 @@ function AiSynthesisPanel({ aiAnalysis, ticker }: { aiAnalysis: AiAnalysis; tick
                 {aiAnalysis.riskFactors.map((risk, i) => (
                   <li key={i} className="flex items-start gap-3">
                     <span className="text-semantic-bear mt-1.5 text-xs">•</span>
-                    <p className="text-[15px] text-gray-200 leading-relaxed font-light">{risk}</p>
+                    <p className="text-[15px] text-gray-800 dark:text-gray-200 leading-relaxed font-light">{risk}</p>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-[16px] text-gray-200 leading-loose font-light">
+              <p className="text-[16px] text-gray-800 dark:text-gray-200 leading-loose font-light">
                 {activeSection.getContent(aiAnalysis)}
               </p>
             )}
