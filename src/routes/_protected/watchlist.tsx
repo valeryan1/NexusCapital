@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { Star, Plus, Trash2, Bell } from "lucide-react";
 import { useState } from "react";
 import { createServerFn } from "@tanstack/react-start";
@@ -54,6 +54,7 @@ export const Route = createFileRoute("/_protected/watchlist")({
 });
 
 function WatchlistPage() {
+  const router = useRouter();
   const { watchlist } = Route.useLoaderData();
   const [symbol, setSymbol] = useState("");
   const [name, setName] = useState("");
@@ -67,7 +68,7 @@ function WatchlistPage() {
       await addToWatchlistFn({ data: { symbol: symbol.toUpperCase(), name } });
       setSymbol("");
       setName("");
-      window.location.reload();
+      await router.invalidate();
     } catch {
       // Error handled by server fn
     } finally {
@@ -78,7 +79,7 @@ function WatchlistPage() {
   const handleRemove = async (sym: string) => {
     try {
       await removeFromWatchlistFn({ data: { symbol: sym } });
-      window.location.reload();
+      await router.invalidate();
     } catch {
       // Error handled by server fn
     }
