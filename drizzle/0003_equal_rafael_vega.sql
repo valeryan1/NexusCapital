@@ -1,3 +1,22 @@
+CREATE TABLE "watchlist" (
+	"id" text PRIMARY KEY NOT NULL,
+	"user_id" text NOT NULL,
+	"symbol" text NOT NULL,
+	"name" text,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "watchlist_notification" (
+	"id" text PRIMARY KEY NOT NULL,
+	"user_id" text NOT NULL,
+	"kind" text NOT NULL,
+	"symbol" text NOT NULL,
+	"title" text NOT NULL,
+	"body" text NOT NULL,
+	"read_at" timestamp with time zone,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "tenants" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" text NOT NULL,
@@ -185,11 +204,14 @@ CREATE TABLE "system_settings" (
 	CONSTRAINT "system_settings_key_unique" UNIQUE("key")
 );
 --> statement-breakpoint
+ALTER TABLE "user" ADD COLUMN "credits" integer DEFAULT 5 NOT NULL;--> statement-breakpoint
 ALTER TABLE "user" ADD COLUMN "credit_balance" integer DEFAULT 20 NOT NULL;--> statement-breakpoint
 ALTER TABLE "user" ADD COLUMN "default_tenant_id" uuid;--> statement-breakpoint
 ALTER TABLE "user" ADD COLUMN "status" text DEFAULT 'active' NOT NULL;--> statement-breakpoint
 ALTER TABLE "user" ADD COLUMN "locale" text DEFAULT 'id' NOT NULL;--> statement-breakpoint
 ALTER TABLE "user" ADD COLUMN "last_login_at" timestamp with time zone;--> statement-breakpoint
+ALTER TABLE "watchlist" ADD CONSTRAINT "watchlist_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "watchlist_notification" ADD CONSTRAINT "watchlist_notification_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "tenants" ADD CONSTRAINT "tenants_owner_user_id_user_id_fk" FOREIGN KEY ("owner_user_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "tenant_members" ADD CONSTRAINT "tenant_members_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "tenant_members" ADD CONSTRAINT "tenant_members_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
