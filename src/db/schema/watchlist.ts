@@ -6,6 +6,7 @@ export const watchlist = pgTable("watchlist", {
   userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
   symbol: text("symbol").notNull(),
   name: text("name"),
+  groupName: text("group_name").default("Default").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
