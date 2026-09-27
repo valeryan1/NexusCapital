@@ -377,11 +377,11 @@ function FaqAccordionItem({ question, iconName, title, content, isOpen, onToggle
       </button>
       {isOpen && (
         <div className="px-4 pb-5 animate-in slide-in-from-top-2 duration-200">
-          <h4 className="text-sm font-bold text-white flex items-center gap-2 mb-2">
+          <h4 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-2">
             <Icon className="size-4 text-brand-500" />
             {title}
           </h4>
-          <p className="text-sm text-gray-400 font-medium leading-relaxed">{content}</p>
+          <p className="text-sm text-gray-700 dark:text-gray-400 font-medium leading-relaxed">{content}</p>
         </div>
       )}
     </div>
