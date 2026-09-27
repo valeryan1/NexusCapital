@@ -16,6 +16,7 @@ import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { getTrendingStocks } from "@/services/sectors.service.server";
+import { AddToWatchlistButton } from "@/components/add-to-watchlist-button";
 
 const fetchDashboardStatsFn = createServerFn({ method: "GET" })
   .handler(async () => {
@@ -209,6 +210,7 @@ function OverviewPage() {
                   <th className="px-6 py-3 text-left text-[10px] sm:text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Price & Change</th>
                   <th className="px-6 py-3 text-left text-[10px] sm:text-[11px] font-semibold text-gray-500 uppercase tracking-wider">AI Score</th>
                   <th className="px-6 py-3 text-right text-[10px] sm:text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-right text-[10px] sm:text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-dark-800">
@@ -256,6 +258,13 @@ function OverviewPage() {
                           <span className={`text-[10px] sm:text-xs px-2.5 py-1 rounded font-bold uppercase tracking-wider ${badgeClass}`}>
                             {label}
                           </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right">
+                          <AddToWatchlistButton
+                            symbol={stock.ticker}
+                            companyName={stock.name}
+                            currentPrice={stock.price}
+                          />
                         </td>
                       </tr>
                     );

@@ -29,6 +29,7 @@ export function AddToWatchlistButton({ symbol, name, companyName, currentPrice, 
       });
       if (response.ok) {
         setIsAdded(true);
+        window.dispatchEvent(new Event("nexus:notifications-updated"));
       }
     } catch {
       // Silently fail

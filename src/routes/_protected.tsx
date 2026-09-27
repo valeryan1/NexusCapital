@@ -16,7 +16,8 @@ import {
   Landmark,
   User,
   Sparkles,
-  Activity
+  Activity,
+  Star
 } from "lucide-react";
 import { cn } from "cn";
 import { Brand } from "@/components/brand";
@@ -40,7 +41,7 @@ const navItemsWorkspace = [
 ];
 
 const navItemsIntegration = [
-  // { id: "watchlist", label: "Watchlist", icon: Star, path: "/watchlist" },
+  { id: "watchlist", label: "Watchlist", icon: Star, path: "/watchlist" },
   { id: "billing", label: "Billing", icon: Settings, path: "/billing" },
 ];
 
@@ -73,11 +74,14 @@ function ProtectedLayout() {
         return;
       }
     };
+    const refreshNotifications = () => void load();
     void load();
     const interval = window.setInterval(load, 60_000);
+    window.addEventListener("nexus:notifications-updated", refreshNotifications);
     return () => {
       active = false;
       window.clearInterval(interval);
+      window.removeEventListener("nexus:notifications-updated", refreshNotifications);
     };
   }, []);
 
@@ -123,13 +127,20 @@ function ProtectedLayout() {
   return (
     <div className="flex h-screen overflow-hidden bg-background text-gray-300 font-sans antialiased selection:bg-brand-500 selection:text-white">
       {/* Sidebar */}
+      {/* Mobile Backdrop */}
+      {mobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 z-30 md:hidden backdrop-blur-sm"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
       <aside className={cn(
-        "flex-shrink-0 border-r border-dark-800 bg-dark-900 flex-col z-20 relative transition-all duration-300",
+        "flex-shrink-0 border-r border-dark-800 bg-dark-900 flex-col z-40 relative transition-all duration-300",
         isCollapsed ? "w-20" : "w-64",
-        mobileMenuOpen ? "flex absolute inset-y-0 left-0" : "hidden md:flex"
+        mobileMenuOpen ? "flex fixed inset-y-0 left-0" : "hidden md:flex"
       )}>
         {/* Logo */}
-        <div className="h-28 flex items-center justify-center px-4 border-b border-dark-800 bg-dark-900/50 backdrop-blur-sm z-10 w-full overflow-hidden">
+        <div className="h-32 flex items-center justify-center px-4 border-b border-dark-800 bg-dark-900/50 backdrop-blur-sm z-10 w-full overflow-hidden">
           <Brand collapsed={isCollapsed} />
         </div>
 

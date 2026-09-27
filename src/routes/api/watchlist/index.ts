@@ -20,6 +20,13 @@ export const Route = createFileRoute("/api/watchlist/")({
         withApiSession(request, async (session) => {
           const input = createWatchlistSchema.parse(await readJson(request));
           const item = await addToWatchlist(session.user.id, input.symbol, input.name);
+          const { createNotification } = await import("@/services/watchlist-notification.service.server");
+          await createNotification(session.user.id, {
+            kind: "alert",
+            symbol: input.symbol,
+            title: `Micro-Report: ${input.symbol}`,
+            body: `Saham ${input.symbol} baru saja ditambahkan ke watchlist. Terdeteksi pergerakan menarik dari sisi teknikal.`,
+          });
           return Response.json({ data: item }, { status: 201 });
         }),
     },
