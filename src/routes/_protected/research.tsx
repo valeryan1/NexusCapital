@@ -337,10 +337,10 @@ function PriceRangeBar({ low, high, current }: { low: number; high: number; curr
           <div className="w-1.5 h-5 bg-brand-500 rounded-full ring-2 ring-brand-500/30 shadow-[0_0_10px_rgba(255,122,0,0.5)]" />
         </div>
       </div>
-      <p className="text-xs text-gray-400 text-center">
+      <p className="text-xs text-gray-500 text-center font-medium mt-3">
         Current: <span className="text-white font-bold">IDR {current.toLocaleString('id-ID')}</span>
         <span className="text-gray-600 mx-1">·</span>
-        <span className="text-brand-500 font-medium">{((high - current) / high * 100).toFixed(1)}% off 52w high</span>
+        <span className="text-brand-500 font-bold">{((high - current) / high * 100).toFixed(1)}% off 52w high</span>
       </p>
     </div>
   );
@@ -381,7 +381,7 @@ function FaqAccordionItem({ question, iconName, title, content, isOpen, onToggle
             <Icon className="size-4 text-brand-500" />
             {title}
           </h4>
-          <p className="text-sm text-gray-400 leading-relaxed">{content}</p>
+          <p className="text-sm text-gray-400 font-medium leading-relaxed">{content}</p>
         </div>
       )}
     </div>
@@ -440,7 +440,7 @@ const AI_SECTIONS = [
     icon: Sparkles,
     color: "text-brand-500",
     activeColor: "border-brand-500",
-    bgActive: "bg-brand-500/5",
+    bgActive: "bg-brand-500/10",
     getContent: (a: AiAnalysis) => a.executiveSummary,
     getSnippet: (a: AiAnalysis) => a.executiveSummary.substring(0, 60) + "...",
   },
@@ -1170,8 +1170,8 @@ function ResearchStudio() {
             <div className="p-3 bg-brand-500/5 border border-brand-500/20 rounded-lg">
               <div className="flex items-start gap-2">
                 <Briefcase className="size-4 text-brand-500 shrink-0 mt-0.5" />
-                <p className="text-xs text-gray-400 leading-relaxed">
-                  <strong className="text-gray-200">AI Insight:</strong> {data.bandarmologi.summary}
+                <p className="text-xs text-gray-500 font-medium leading-relaxed">
+                  <strong className="text-gray-900 dark:text-gray-200">AI Insight:</strong> {data.bandarmologi.summary}
                 </p>
               </div>
             </div>
