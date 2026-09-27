@@ -8,7 +8,6 @@ import {
   PieChart, 
   Settings, 
   Zap,
-  Star,
   Bell,
   MoreVertical,
   ChevronLeft,
@@ -41,7 +40,7 @@ const navItemsWorkspace = [
 ];
 
 const navItemsIntegration = [
-  { id: "watchlist", label: "Watchlist", icon: Star, path: "/watchlist" },
+  // { id: "watchlist", label: "Watchlist", icon: Star, path: "/watchlist" },
   { id: "billing", label: "Billing", icon: Settings, path: "/billing" },
 ];
 
@@ -354,7 +353,7 @@ function ProtectedLayout() {
                         </div>
                       )}
                     </div>
-                    <div className="border-t border-dark-800 bg-dark-950 p-2 text-center">
+                    {/* <div className="border-t border-dark-800 bg-dark-950 p-2 text-center">
                       <Link
                         to="/watchlist"
                         onClick={() => setShowNotifications(false)}
@@ -362,7 +361,7 @@ function ProtectedLayout() {
                       >
                         Kelola Watchlist
                       </Link>
-                    </div>
+                    </div> */}
                   </div>
                 </>
               )}
