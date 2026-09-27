@@ -667,9 +667,9 @@ function ResearchStudio() {
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
             <BarChart2 className="size-6 text-brand-500" />
-            Institutional Research Studio
+            Research Studio
           </h1>
-          <p className="text-gray-400 text-sm mt-1">Advanced equity analysis, quant models, and foreign flow tracking.</p>
+          <p className="text-gray-400 text-sm mt-1">Analisis ekuitas tingkat lanjut, model kuantitatif, dan pelacakan aliran dana asing.</p>
         </div>
         <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
           <div className="relative w-full md:w-64">

@@ -66,7 +66,7 @@ function WatchlistPage() {
     <div className="space-y-6 max-w-4xl mx-auto pb-12">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Watchlist Groups</h1>
+          <h1 className="text-2xl font-bold text-white">Watchlist Saham</h1>
           <p className="text-sm text-gray-500 mt-1">
             Pantau saham pilihanmu. Tambahkan saham baru melalui menu Screener, Research, atau Overview.
           </p>

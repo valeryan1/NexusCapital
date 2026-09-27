@@ -137,7 +137,7 @@ function OverviewPage() {
         {/* Total Reports Card */}
         <div className="bg-dark-900 rounded-xl p-6 border border-dark-800 relative overflow-hidden group hover:border-brand-500/50 transition-colors flex flex-col justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-400">Reports Generated</p>
+            <p className="text-sm font-medium text-gray-400">Laporan Riset Dibuat</p>
             <div className="flex items-end gap-3 mt-2">
               <h3 className="text-3xl font-bold text-white">348</h3>
               <span className="flex items-center gap-1 text-sm font-medium text-semantic-bull mb-1 bg-semantic-bull/10 px-1.5 py-0.5 rounded border border-semantic-bull/20">
@@ -159,7 +159,7 @@ function OverviewPage() {
         <div className="bg-dark-900 rounded-xl p-6 border border-dark-800 group hover:border-brand-500/50 transition-colors">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <p className="text-sm font-medium text-gray-400">Active Alerts</p>
+              <p className="text-sm font-medium text-gray-400">Micro-Alerts Aktif</p>
               <h3 className="text-3xl font-bold text-white mt-2">3</h3>
             </div>
             <div className="w-10 h-10 rounded-lg bg-dark-950 border border-dark-800 flex items-center justify-center text-brand-400 relative">
@@ -178,7 +178,7 @@ function OverviewPage() {
         <div className="bg-dark-900 rounded-xl p-6 border border-dark-800 group hover:border-brand-500/50 transition-colors">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <p className="text-sm font-medium text-gray-400">Tokens Processed</p>
+              <p className="text-sm font-medium text-gray-400">Token Terproses</p>
               <h3 className="text-3xl font-bold text-white mt-2">1.2M</h3>
             </div>
             <div className="w-10 h-10 rounded-lg bg-dark-950 border border-dark-800 flex items-center justify-center text-purple-400">
@@ -281,31 +281,31 @@ function OverviewPage() {
           <div className="px-4 py-3 border-b border-dark-800 flex justify-between items-center bg-dark-900">
             <h3 className="text-gray-300 text-xs font-mono uppercase tracking-wider flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></div>
-              Live Swarm Log
+              Log Aktivitas AI Swarm
             </h3>
             <Terminal className="text-dark-700 size-4" />
           </div>
           <div className="flex-1 p-5 font-mono text-[11px] sm:text-xs space-y-4 overflow-y-auto max-h-[350px]">
             <div className="text-gray-400">
-              <span className="text-dark-600">[10:42:01]</span> <span className="text-emerald-400 font-bold">SYS:</span> Micro-report trigger evaluated for <span className="text-white font-bold">WIFI</span>.
+              <span className="text-dark-600">[10:42:01]</span> <span className="text-emerald-400 font-bold">SYS:</span> Pemicu Micro-report dievaluasi untuk <span className="text-white font-bold">WIFI</span>.
             </div>
             <div className="text-gray-400">
-              <span className="text-dark-600">[10:43:15]</span> <span className="text-blue-400 font-bold">AGT-F:</span> Fetching Q3 balance sheet for <span className="text-white font-bold">BBCA</span>...
+              <span className="text-dark-600">[10:43:15]</span> <span className="text-blue-400 font-bold">AGT-F:</span> Mengambil laporan Q3 <span className="text-white font-bold">BBCA</span>...
             </div>
             <div className="text-gray-400">
-              <span className="text-dark-600">[10:43:16]</span> <span className="text-purple-400 font-bold">AGT-T:</span> Analyzing volume profile (30d) for <span className="text-white font-bold">BBCA</span>...
+              <span className="text-dark-600">[10:43:16]</span> <span className="text-purple-400 font-bold">AGT-T:</span> Menganalisis profil volume <span className="text-white font-bold">BBCA</span>...
             </div>
             <div className="text-gray-400">
-              <span className="text-dark-600">[10:43:18]</span> <span className="text-brand-500 font-bold">ORCH:</span> Synthesizing conflicting bias.
+              <span className="text-dark-600">[10:43:18]</span> <span className="text-brand-500 font-bold">ORCH:</span> Menyintesis analisis teknikal & fundamental.
             </div>
             <div className="text-gray-400">
-              <span className="text-dark-600">[10:43:20]</span> <span className="text-emerald-400 font-bold">SYS:</span> PDF Generated. Tokens used: 4,102.
+              <span className="text-dark-600">[10:43:20]</span> <span className="text-emerald-400 font-bold">SYS:</span> Laporan siap. Token: 4,102.
             </div>
             <div className="text-gray-400">
-              <span className="text-dark-600">[10:45:10]</span> <span className="text-blue-400 font-bold">AGT-F:</span> Fetching screener data for <span className="text-white font-bold">GOTO</span>.
+              <span className="text-dark-600">[10:45:10]</span> <span className="text-blue-400 font-bold">AGT-F:</span> Memuat data screener untuk <span className="text-white font-bold">GOTO</span>.
             </div>
             <div className="flex items-center gap-2 text-brand-500 font-bold mt-4 pt-4 border-t border-dark-800/50">
-              <span className="text-dark-600 font-normal">[{new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}]</span> Awaiting prompt <span className="w-2 h-4 bg-brand-500 animate-pulse"></span>
+              <span className="text-dark-600 font-normal">[{new Date().toLocaleTimeString('id-ID', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}]</span> Menunggu perintah... <span className="w-2 h-4 bg-brand-500 animate-pulse"></span>
             </div>
           </div>
         </div>

@@ -41,14 +41,14 @@ function LandingPage() {
           </div>
           
           <h1 className="text-5xl font-extrabold tracking-tight sm:text-7xl lg:text-8xl text-white drop-shadow-md">
-            AI-Powered <br className="hidden sm:block" />
+            Riset Saham Institusional <br className="hidden sm:block" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-500 to-orange-300">
-              Institutional Research
+              Bertenaga AI
             </span>
           </h1>
           
           <p className="mx-auto max-w-2xl text-lg leading-relaxed text-gray-400 sm:text-xl">
-            Democratizing financial intelligence. Transform raw Indonesian stock market data into comprehensive research, proprietary Nexus Scores, and automated micro-reports in <span className="text-white font-medium">~40 seconds</span>.
+            Mendemokratisasi intelijen finansial. Ubah data mentah IHSG menjadi riset mendalam, Skor Nexus eksklusif, dan <span className="italic">micro-report</span> otomatis hanya dalam <span className="text-white font-medium">~40 detik</span>.
           </p>
           
           {/* Guest Entry */}
@@ -80,8 +80,8 @@ function LandingPage() {
         {/* Multi-Agent Architecture Section */}
         <div id="architecture" className="mx-auto mt-32 max-w-7xl relative z-10 w-full animate-fade-in" style={{ animationDelay: '0.2s' }}>
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-white mb-4">The Multi-Agent Swarm</h2>
-            <p className="text-gray-400 max-w-2xl mx-auto">Our specialized AI agents work concurrently to analyze, debate, and synthesize market data, ensuring an unbiased and comprehensive view.</p>
+            <h2 className="text-3xl font-bold text-white mb-4">Arsitektur Multi-Agent AI</h2>
+            <p className="text-gray-400 max-w-2xl mx-auto">Agen AI khusus kami bekerja secara independen untuk menganalisis, menguji sentimen, dan menyintesis data pasar demi menghasilkan riset komprehensif tanpa bias.</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left relative">
@@ -97,7 +97,7 @@ function LandingPage() {
                 Agent 1 <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">FUNDAMENTAL</span>
               </h3>
               <p className="text-gray-400 leading-relaxed text-sm">
-                Analyzes financial statements, revenue growth, and valuation metrics via Sectors API to determine long-term intrinsic value.
+                Menganalisis laporan keuangan, tren pendapatan, dan metrik valuasi via Sectors API untuk menentukan nilai intrinsik jangka panjang.
               </p>
             </div>
             
@@ -107,10 +107,10 @@ function LandingPage() {
                 <TrendingUp className="size-7" />
               </div>
               <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                Agent 2 <span className="text-[10px] font-mono text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/20">TECH & BANDAR</span>
+                Agent 2 <span className="text-[10px] font-mono text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/20">TEKNIKAL & BANDAR</span>
               </h3>
               <p className="text-gray-400 leading-relaxed text-sm">
-                Evaluates price action, support/resistance, volume spikes, and accumulation/distribution metrics for timing and momentum.
+                Mengevaluasi aksi harga, support/resistance, lonjakan volume, serta metrik akumulasi/distribusi untuk *timing* masuk yang tepat.
               </p>
             </div>
 
@@ -123,7 +123,7 @@ function LandingPage() {
                 Agent 3 <span className="text-[10px] font-mono text-brand-400 bg-brand-500/10 px-2 py-0.5 rounded border border-brand-500/20">ORCHESTRATOR</span>
               </h3>
               <p className="text-gray-400 leading-relaxed text-sm">
-                Synthesizes findings from Agents 1 & 2, resolves conflicting biases, calculates the Nexus Score, and generates the final One-Pager report.
+                Menyintesis temuan Agen 1 & 2, mengalkulasi Skor Nexus akhir, serta memproduksi laporan PDF terstruktur sekelas analis profesional.
               </p>
             </div>
           </div>
@@ -136,8 +136,8 @@ function LandingPage() {
               <ShieldAlert className="size-6" />
             </div>
             <div>
-              <h4 className="font-bold text-white mb-1">Event-Triggered Micro-Reports</h4>
-              <p className="text-sm text-gray-500">Autonomous polling during market hours. Get alerts when critical thresholds (e.g., price drops &gt; 5%) are breached.</p>
+              <h4 className="font-bold text-white mb-1">Micro-Report Otomatis</h4>
+              <p className="text-sm text-gray-500">Sistem terus memantau pergerakan pasar. Dapatkan notifikasi dan analisis instan saat indikator teknikal penting tersentuh.</p>
             </div>
           </div>
           
@@ -146,8 +146,8 @@ function LandingPage() {
               <Sparkles className="size-6" />
             </div>
             <div>
-              <h4 className="font-bold text-white mb-1">Nexus Score</h4>
-              <p className="text-sm text-gray-500">A proprietary 1-100 scoring system blending Fundamental, Technical, and Risk factors for instant peer comparison.</p>
+              <h4 className="font-bold text-white mb-1">Skor Nexus Eksklusif</h4>
+              <p className="text-sm text-gray-500">Sistem skor 1-100 yang menggabungkan faktor Fundamental, Teknikal, dan Risiko. Bandingkan saham dengan mudah dan cepat.</p>
             </div>
           </div>
 
@@ -156,8 +156,8 @@ function LandingPage() {
               <Zap className="size-6" />
             </div>
             <div>
-              <h4 className="font-bold text-white mb-1">B2B API Gateway</h4>
-              <p className="text-sm text-gray-500">White-label PDF generation and REST APIs designed for institutions to integrate AI research into their own platforms.</p>
+              <h4 className="font-bold text-white mb-1">Gateway API B2B</h4>
+              <p className="text-sm text-gray-500">Bangun solusi White-label atau integrasikan data riset PDF AI kami langsung ke platform atau sekuritas milik Anda.</p>
             </div>
           </div>
         </div>
