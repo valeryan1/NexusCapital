@@ -110,12 +110,12 @@
   /* Inverted Theme Variables for Light Mode */
   --ds-dark-950: #FAFAFA; /* Soft light background */
   --ds-dark-900: #FFFFFF; /* Pure white cards */
-  --ds-dark-800: #E4E4E7; /* Borders/Hover (Zinc-200) */
-  --ds-dark-700: #D4D4D8; /* Deeper Borders (Zinc-300) */
-  --ds-white: #18181B;    /* Text that was white is now nearly black (Zinc-900) */
-  --ds-gray-300: #3F3F46; /* Darker text for readability (Zinc-700) */
-  --ds-gray-400: #52525B; /* Medium text (Zinc-600) */
-  --ds-gray-500: #71717A; /* Lighter medium text (Zinc-500) */
+  --ds-dark-800: #E4E4E7; /* Borders/Hover */
+  --ds-dark-700: #D4D4D8; /* Deeper Borders */
+  --ds-white: #000000;    /* Pure black for maximum clarity on titles */
+  --ds-gray-300: #1F2937; /* Very dark gray for readability */
+  --ds-gray-400: #374151; /* Dark gray for subtitles */
+  --ds-gray-500: #4B5563; /* Medium gray */
   
   --glass-bg: rgba(255, 255, 255, 0.85);
   --glass-border: rgba(228, 228, 231, 0.6);

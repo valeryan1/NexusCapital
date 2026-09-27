@@ -270,7 +270,7 @@ function ProtectedLayout() {
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col h-screen overflow-hidden bg-gradient-to-br from-[#16161A] via-[#0E0E12] to-[#09090B] relative">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden bg-background relative">
         {/* Ambient Background Glow and Grid */}
         <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] pointer-events-none mix-blend-screen"></div>
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,122,0,0.08)_0%,transparent_60%)] pointer-events-none"></div>
