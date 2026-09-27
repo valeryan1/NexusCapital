@@ -54,7 +54,7 @@ function LandingPage() {
           {/* Guest Entry */}
           <div className="w-full max-w-2xl mx-auto mt-8 text-left">
             <Link
-              to="/assistant/guest"
+              to="/assistant"
               className="group relative block"
               aria-label="Buka Nexus Assistant tanpa login"
             >

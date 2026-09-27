@@ -56,7 +56,7 @@ export function ChatWidget() {
         ...prev,
         { role: "assistant", content: data.reply },
       ]);
-    } catch (err) {
+    } catch {
       setMessages((prev) => [
         ...prev,
         {

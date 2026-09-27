@@ -25,12 +25,17 @@ import { Route as ProtectedPreferencesRouteImport } from './routes/_protected/pr
 import { Route as ProtectedProfileRouteImport } from './routes/_protected/profile'
 import { Route as ProtectedResearchRouteImport } from './routes/_protected/research'
 import { Route as ProtectedValuationRouteImport } from './routes/_protected/valuation'
+import { Route as ProtectedWatchlistRouteImport } from './routes/_protected/watchlist'
 import { Route as ProtectedReportIdRouteImport } from './routes/_protected/report/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiChatIndexRouteImport } from './routes/api/chat/index'
+import { Route as ApiCreditsIndexRouteImport } from './routes/api/credits/index'
 import { Route as ApiIpoIndexRouteImport } from './routes/api/ipo/index'
 import { Route as ApiNotesIndexRouteImport } from './routes/api/notes/index'
 import { Route as ApiNotesIdRouteImport } from './routes/api/notes/$id'
+import { Route as ApiWatchlistIndexRouteImport } from './routes/api/watchlist/index'
+import { Route as ApiWatchlistSymbolRouteImport } from './routes/api/watchlist/$symbol'
+import { Route as ApiWatchlistNotificationsRouteImport } from './routes/api/watchlist/notifications'
 import { Route as ApiAdminNotesIndexRouteImport } from './routes/api/admin/notes/index'
 import { Route as ApiAdminNotesIdRouteImport } from './routes/api/admin/notes/$id'
 
@@ -112,6 +117,11 @@ const ProtectedValuationRoute = ProtectedValuationRouteImport.update({
   path: '/valuation',
   getParentRoute: () => ProtectedRoute,
 } as any)
+const ProtectedWatchlistRoute = ProtectedWatchlistRouteImport.update({
+  id: '/watchlist',
+  path: '/watchlist',
+  getParentRoute: () => ProtectedRoute,
+} as any)
 const ProtectedReportIdRoute = ProtectedReportIdRouteImport.update({
   id: '/report/$id',
   path: '/report/$id',
@@ -125,6 +135,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 const ApiChatIndexRoute = ApiChatIndexRouteImport.update({
   id: '/api/chat/',
   path: '/api/chat/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCreditsIndexRoute = ApiCreditsIndexRouteImport.update({
+  id: '/api/credits/',
+  path: '/api/credits/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiIpoIndexRoute = ApiIpoIndexRouteImport.update({
@@ -142,6 +157,22 @@ const ApiNotesIdRoute = ApiNotesIdRouteImport.update({
   path: '/api/notes/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiWatchlistIndexRoute = ApiWatchlistIndexRouteImport.update({
+  id: '/api/watchlist/',
+  path: '/api/watchlist/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiWatchlistSymbolRoute = ApiWatchlistSymbolRouteImport.update({
+  id: '/api/watchlist/$symbol',
+  path: '/api/watchlist/$symbol',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiWatchlistNotificationsRoute =
+  ApiWatchlistNotificationsRouteImport.update({
+    id: '/api/watchlist/notifications',
+    path: '/api/watchlist/notifications',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiAdminNotesIndexRoute = ApiAdminNotesIndexRouteImport.update({
   id: '/api/admin/notes/',
   path: '/api/admin/notes/',
@@ -168,12 +199,17 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProtectedProfileRoute
   '/research': typeof ProtectedResearchRoute
   '/valuation': typeof ProtectedValuationRoute
+  '/watchlist': typeof ProtectedWatchlistRoute
   '/report/$id': typeof ProtectedReportIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
+  '/api/watchlist/$symbol': typeof ApiWatchlistSymbolRoute
+  '/api/watchlist/notifications': typeof ApiWatchlistNotificationsRoute
   '/api/chat/': typeof ApiChatIndexRoute
+  '/api/credits/': typeof ApiCreditsIndexRoute
   '/api/ipo/': typeof ApiIpoIndexRoute
   '/api/notes/': typeof ApiNotesIndexRoute
+  '/api/watchlist/': typeof ApiWatchlistIndexRoute
   '/api/admin/notes/$id': typeof ApiAdminNotesIdRoute
   '/api/admin/notes/': typeof ApiAdminNotesIndexRoute
 }
@@ -192,12 +228,17 @@ export interface FileRoutesByTo {
   '/profile': typeof ProtectedProfileRoute
   '/research': typeof ProtectedResearchRoute
   '/valuation': typeof ProtectedValuationRoute
+  '/watchlist': typeof ProtectedWatchlistRoute
   '/report/$id': typeof ProtectedReportIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
+  '/api/watchlist/$symbol': typeof ApiWatchlistSymbolRoute
+  '/api/watchlist/notifications': typeof ApiWatchlistNotificationsRoute
   '/api/chat': typeof ApiChatIndexRoute
+  '/api/credits': typeof ApiCreditsIndexRoute
   '/api/ipo': typeof ApiIpoIndexRoute
   '/api/notes': typeof ApiNotesIndexRoute
+  '/api/watchlist': typeof ApiWatchlistIndexRoute
   '/api/admin/notes/$id': typeof ApiAdminNotesIdRoute
   '/api/admin/notes': typeof ApiAdminNotesIndexRoute
 }
@@ -219,12 +260,17 @@ export interface FileRoutesById {
   '/_protected/profile': typeof ProtectedProfileRoute
   '/_protected/research': typeof ProtectedResearchRoute
   '/_protected/valuation': typeof ProtectedValuationRoute
+  '/_protected/watchlist': typeof ProtectedWatchlistRoute
   '/_protected/report/$id': typeof ProtectedReportIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
+  '/api/watchlist/$symbol': typeof ApiWatchlistSymbolRoute
+  '/api/watchlist/notifications': typeof ApiWatchlistNotificationsRoute
   '/api/chat/': typeof ApiChatIndexRoute
+  '/api/credits/': typeof ApiCreditsIndexRoute
   '/api/ipo/': typeof ApiIpoIndexRoute
   '/api/notes/': typeof ApiNotesIndexRoute
+  '/api/watchlist/': typeof ApiWatchlistIndexRoute
   '/api/admin/notes/$id': typeof ApiAdminNotesIdRoute
   '/api/admin/notes/': typeof ApiAdminNotesIndexRoute
 }
@@ -245,12 +291,17 @@ export interface FileRouteTypes {
     | '/profile'
     | '/research'
     | '/valuation'
+    | '/watchlist'
     | '/report/$id'
     | '/api/auth/$'
     | '/api/notes/$id'
+    | '/api/watchlist/$symbol'
+    | '/api/watchlist/notifications'
     | '/api/chat/'
+    | '/api/credits/'
     | '/api/ipo/'
     | '/api/notes/'
+    | '/api/watchlist/'
     | '/api/admin/notes/$id'
     | '/api/admin/notes/'
   fileRoutesByTo: FileRoutesByTo
@@ -269,12 +320,17 @@ export interface FileRouteTypes {
     | '/profile'
     | '/research'
     | '/valuation'
+    | '/watchlist'
     | '/report/$id'
     | '/api/auth/$'
     | '/api/notes/$id'
+    | '/api/watchlist/$symbol'
+    | '/api/watchlist/notifications'
     | '/api/chat'
+    | '/api/credits'
     | '/api/ipo'
     | '/api/notes'
+    | '/api/watchlist'
     | '/api/admin/notes/$id'
     | '/api/admin/notes'
   id:
@@ -295,12 +351,17 @@ export interface FileRouteTypes {
     | '/_protected/profile'
     | '/_protected/research'
     | '/_protected/valuation'
+    | '/_protected/watchlist'
     | '/_protected/report/$id'
     | '/api/auth/$'
     | '/api/notes/$id'
+    | '/api/watchlist/$symbol'
+    | '/api/watchlist/notifications'
     | '/api/chat/'
+    | '/api/credits/'
     | '/api/ipo/'
     | '/api/notes/'
+    | '/api/watchlist/'
     | '/api/admin/notes/$id'
     | '/api/admin/notes/'
   fileRoutesById: FileRoutesById
@@ -311,9 +372,13 @@ export interface RootRouteChildren {
   ProtectedRoute: typeof ProtectedRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiNotesIdRoute: typeof ApiNotesIdRoute
+  ApiWatchlistSymbolRoute: typeof ApiWatchlistSymbolRoute
+  ApiWatchlistNotificationsRoute: typeof ApiWatchlistNotificationsRoute
   ApiChatIndexRoute: typeof ApiChatIndexRoute
+  ApiCreditsIndexRoute: typeof ApiCreditsIndexRoute
   ApiIpoIndexRoute: typeof ApiIpoIndexRoute
   ApiNotesIndexRoute: typeof ApiNotesIndexRoute
+  ApiWatchlistIndexRoute: typeof ApiWatchlistIndexRoute
   ApiAdminNotesIdRoute: typeof ApiAdminNotesIdRoute
   ApiAdminNotesIndexRoute: typeof ApiAdminNotesIndexRoute
 }
@@ -432,6 +497,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedValuationRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/watchlist': {
+      id: '/_protected/watchlist'
+      path: '/watchlist'
+      fullPath: '/watchlist'
+      preLoaderRoute: typeof ProtectedWatchlistRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
     '/_protected/report/$id': {
       id: '/_protected/report/$id'
       path: '/report/$id'
@@ -453,6 +525,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/credits/': {
+      id: '/api/credits/'
+      path: '/api/credits'
+      fullPath: '/api/credits/'
+      preLoaderRoute: typeof ApiCreditsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/ipo/': {
       id: '/api/ipo/'
       path: '/api/ipo'
@@ -472,6 +551,27 @@ declare module '@tanstack/react-router' {
       path: '/api/notes/$id'
       fullPath: '/api/notes/$id'
       preLoaderRoute: typeof ApiNotesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/watchlist/': {
+      id: '/api/watchlist/'
+      path: '/api/watchlist'
+      fullPath: '/api/watchlist/'
+      preLoaderRoute: typeof ApiWatchlistIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/watchlist/$symbol': {
+      id: '/api/watchlist/$symbol'
+      path: '/api/watchlist/$symbol'
+      fullPath: '/api/watchlist/$symbol'
+      preLoaderRoute: typeof ApiWatchlistSymbolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/watchlist/notifications': {
+      id: '/api/watchlist/notifications'
+      path: '/api/watchlist/notifications'
+      fullPath: '/api/watchlist/notifications'
+      preLoaderRoute: typeof ApiWatchlistNotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/admin/notes/': {
@@ -515,6 +615,7 @@ interface ProtectedRouteChildren {
   ProtectedProfileRoute: typeof ProtectedProfileRoute
   ProtectedResearchRoute: typeof ProtectedResearchRoute
   ProtectedValuationRoute: typeof ProtectedValuationRoute
+  ProtectedWatchlistRoute: typeof ProtectedWatchlistRoute
   ProtectedReportIdRoute: typeof ProtectedReportIdRoute
 }
 
@@ -530,6 +631,7 @@ const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedProfileRoute: ProtectedProfileRoute,
   ProtectedResearchRoute: ProtectedResearchRoute,
   ProtectedValuationRoute: ProtectedValuationRoute,
+  ProtectedWatchlistRoute: ProtectedWatchlistRoute,
   ProtectedReportIdRoute: ProtectedReportIdRoute,
 }
 
@@ -543,9 +645,13 @@ const rootRouteChildren: RootRouteChildren = {
   ProtectedRoute: ProtectedRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiNotesIdRoute: ApiNotesIdRoute,
+  ApiWatchlistSymbolRoute: ApiWatchlistSymbolRoute,
+  ApiWatchlistNotificationsRoute: ApiWatchlistNotificationsRoute,
   ApiChatIndexRoute: ApiChatIndexRoute,
+  ApiCreditsIndexRoute: ApiCreditsIndexRoute,
   ApiIpoIndexRoute: ApiIpoIndexRoute,
   ApiNotesIndexRoute: ApiNotesIndexRoute,
+  ApiWatchlistIndexRoute: ApiWatchlistIndexRoute,
   ApiAdminNotesIdRoute: ApiAdminNotesIdRoute,
   ApiAdminNotesIndexRoute: ApiAdminNotesIndexRoute,
 }
