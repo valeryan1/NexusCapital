@@ -10,6 +10,7 @@ import {
 import { siteConfig } from "@/config/site";
 import { Providers } from "@/components/providers";
 import { Button } from "@/components/ui/button";
+import { ChatWidget } from "@/components/chat-widget";
 import { getSessionFn } from "@/lib/session";
 import globalsCss from "@/styles/globals.css?url";
 
@@ -67,6 +68,7 @@ function RootDocument({ children }: { children: ReactNode }) {
             Skip to content
           </a>
           {children}
+          <ChatWidget />
         </Providers>
         <Scripts />
       </body>

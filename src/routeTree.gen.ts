@@ -27,6 +27,7 @@ import { Route as ProtectedResearchRouteImport } from './routes/_protected/resea
 import { Route as ProtectedValuationRouteImport } from './routes/_protected/valuation'
 import { Route as ProtectedReportIdRouteImport } from './routes/_protected/report/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiChatIndexRouteImport } from './routes/api/chat/index'
 import { Route as ApiIpoIndexRouteImport } from './routes/api/ipo/index'
 import { Route as ApiNotesIndexRouteImport } from './routes/api/notes/index'
 import { Route as ApiNotesIdRouteImport } from './routes/api/notes/$id'
@@ -121,6 +122,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiChatIndexRoute = ApiChatIndexRouteImport.update({
+  id: '/api/chat/',
+  path: '/api/chat/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiIpoIndexRoute = ApiIpoIndexRouteImport.update({
   id: '/api/ipo/',
   path: '/api/ipo/',
@@ -165,6 +171,7 @@ export interface FileRoutesByFullPath {
   '/report/$id': typeof ProtectedReportIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
+  '/api/chat/': typeof ApiChatIndexRoute
   '/api/ipo/': typeof ApiIpoIndexRoute
   '/api/notes/': typeof ApiNotesIndexRoute
   '/api/admin/notes/$id': typeof ApiAdminNotesIdRoute
@@ -188,6 +195,7 @@ export interface FileRoutesByTo {
   '/report/$id': typeof ProtectedReportIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
+  '/api/chat': typeof ApiChatIndexRoute
   '/api/ipo': typeof ApiIpoIndexRoute
   '/api/notes': typeof ApiNotesIndexRoute
   '/api/admin/notes/$id': typeof ApiAdminNotesIdRoute
@@ -214,6 +222,7 @@ export interface FileRoutesById {
   '/_protected/report/$id': typeof ProtectedReportIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
+  '/api/chat/': typeof ApiChatIndexRoute
   '/api/ipo/': typeof ApiIpoIndexRoute
   '/api/notes/': typeof ApiNotesIndexRoute
   '/api/admin/notes/$id': typeof ApiAdminNotesIdRoute
@@ -239,6 +248,7 @@ export interface FileRouteTypes {
     | '/report/$id'
     | '/api/auth/$'
     | '/api/notes/$id'
+    | '/api/chat/'
     | '/api/ipo/'
     | '/api/notes/'
     | '/api/admin/notes/$id'
@@ -262,6 +272,7 @@ export interface FileRouteTypes {
     | '/report/$id'
     | '/api/auth/$'
     | '/api/notes/$id'
+    | '/api/chat'
     | '/api/ipo'
     | '/api/notes'
     | '/api/admin/notes/$id'
@@ -287,6 +298,7 @@ export interface FileRouteTypes {
     | '/_protected/report/$id'
     | '/api/auth/$'
     | '/api/notes/$id'
+    | '/api/chat/'
     | '/api/ipo/'
     | '/api/notes/'
     | '/api/admin/notes/$id'
@@ -299,6 +311,7 @@ export interface RootRouteChildren {
   ProtectedRoute: typeof ProtectedRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiNotesIdRoute: typeof ApiNotesIdRoute
+  ApiChatIndexRoute: typeof ApiChatIndexRoute
   ApiIpoIndexRoute: typeof ApiIpoIndexRoute
   ApiNotesIndexRoute: typeof ApiNotesIndexRoute
   ApiAdminNotesIdRoute: typeof ApiAdminNotesIdRoute
@@ -433,6 +446,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/chat/': {
+      id: '/api/chat/'
+      path: '/api/chat'
+      fullPath: '/api/chat/'
+      preLoaderRoute: typeof ApiChatIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/ipo/': {
       id: '/api/ipo/'
       path: '/api/ipo'
@@ -523,6 +543,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProtectedRoute: ProtectedRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiNotesIdRoute: ApiNotesIdRoute,
+  ApiChatIndexRoute: ApiChatIndexRoute,
   ApiIpoIndexRoute: ApiIpoIndexRoute,
   ApiNotesIndexRoute: ApiNotesIndexRoute,
   ApiAdminNotesIdRoute: ApiAdminNotesIdRoute,
