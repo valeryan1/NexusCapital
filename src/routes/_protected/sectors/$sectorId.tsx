@@ -21,11 +21,11 @@ const sectorData = {
   healthScore: 7.4,
   growthScore: 5.9,
   topCompanies: [
-    { ticker: 'BMRI.JK', name: 'PT Bank Mandiri (Persero) Tbk', profit: 69.99, revenue: 150.2, marketCap: 800.5, growth: 12.4 },
-    { ticker: 'BBRI.JK', name: 'PT Bank Rakyat Indonesia (Persero) Tbk', profit: 62.32, revenue: 140.8, marketCap: 750.2, growth: 10.1 },
-    { ticker: 'BBCA.JK', name: 'PT Bank Central Asia Tbk', profit: 58.12, revenue: 130.5, marketCap: 1100.8, growth: 15.2 },
-    { ticker: 'BBNI.JK', name: 'PT Bank Negara Indonesia (Persero) Tbk', profit: 20.81, revenue: 80.4, marketCap: 300.4, growth: 8.5 },
-    { ticker: 'BRIS.JK', name: 'PT Bank Syariah Indonesia Tbk', profit: 7.98, revenue: 30.2, marketCap: 150.1, growth: 22.1 },
+    { ticker: 'BMRI', name: 'PT Bank Mandiri (Persero) Tbk', profit: 69.99, revenue: 150.2, marketCap: 800.5, growth: 12.4 },
+    { ticker: 'BBRI', name: 'PT Bank Rakyat Indonesia (Persero) Tbk', profit: 62.32, revenue: 140.8, marketCap: 750.2, growth: 10.1 },
+    { ticker: 'BBCA', name: 'PT Bank Central Asia Tbk', profit: 58.12, revenue: 130.5, marketCap: 1100.8, growth: 15.2 },
+    { ticker: 'BBNI', name: 'PT Bank Negara Indonesia (Persero) Tbk', profit: 20.81, revenue: 80.4, marketCap: 300.4, growth: 8.5 },
+    { ticker: 'BRIS', name: 'PT Bank Syariah Indonesia Tbk', profit: 7.98, revenue: 30.2, marketCap: 150.1, growth: 22.1 },
   ],
   news: [
     { title: 'BBCA and AMRT lead foreign net buying as IHSG falls on Friday', date: 'Sep 26, 2026', sentiment: 'bullish' },
