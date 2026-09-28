@@ -2,6 +2,8 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
+/* The app only sets a `light` class on <html>; dark is the unclassed default. */
+@custom-variant light (&:is(.light *));
 
 @theme inline {
   --color-background: var(--background);

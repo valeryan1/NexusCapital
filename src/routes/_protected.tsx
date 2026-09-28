@@ -140,7 +140,7 @@ function ProtectedLayout() {
         mobileMenuOpen ? "flex fixed inset-y-0 left-0" : "hidden md:flex"
       )}>
         {/* Logo */}
-        <div className="h-32 flex items-center justify-center px-4 border-b border-dark-800 bg-dark-900/50 backdrop-blur-sm z-10 w-full overflow-hidden">
+        <div className="h-28 flex items-center justify-center px-4 border-b border-dark-800 bg-dark-900/50 backdrop-blur-sm z-10 w-full overflow-hidden">
           <Brand collapsed={isCollapsed} />
         </div>
 

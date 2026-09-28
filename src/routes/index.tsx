@@ -13,7 +13,7 @@ function LandingPage() {
       <header className="fixed top-0 left-0 right-0 z-50 flex h-20 items-center border-b border-dark-800 glass px-6 transition-all duration-300">
         <div className="flex flex-1 items-center justify-between mx-auto max-w-7xl w-full">
           <Link to="/" className="flex items-center cursor-pointer group">
-            <div className="w-[140px] h-[140px] -my-8 -ml-6 flex items-center justify-center transition-all group-hover:scale-105">
+            <div className="w-[190px] h-[80px] flex items-center justify-center transition-all group-hover:scale-105">
               <img src="/logo.png" alt="NexusCapital" className="w-full h-full object-contain drop-shadow-md" />
             </div>
           </Link>
