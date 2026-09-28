@@ -20,18 +20,33 @@ export function AddToWatchlistButton({ symbol, name, companyName, currentPrice, 
   const [isAdded, setIsAdded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, right: 0 });
   const [customGroup, setCustomGroup] = useState("");
   const popoverRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
+      if (popoverRef.current && !popoverRef.current.contains(event.target as Node) && buttonRef.current && !buttonRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const handleToggle = () => {
+    if (isAdded) return;
+    if (!isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      // Position fixed below the button, aligned to right edge
+      setDropdownPos({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right,
+      });
+    }
+    setIsOpen(!isOpen);
+  };
 
   const handleAdd = async (groupName: string) => {
     setIsLoading(true);
@@ -40,23 +55,28 @@ export function AddToWatchlistButton({ symbol, name, companyName, currentPrice, 
       const response = await fetch("/api/watchlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ symbol, name: displayName, groupName: groupName || "Default" }),
+        body: JSON.stringify({ symbol, name: displayName || "", groupName: groupName || "Default" }),
       });
       if (response.ok) {
         setIsAdded(true);
         window.dispatchEvent(new Event("nexus:notifications-updated"));
+      } else {
+        const errData = await response.json().catch(() => ({}));
+        console.error("Watchlist API error:", response.status, errData);
+        alert(`Gagal menambah watchlist: ${errData?.error?.message || response.statusText}`);
       }
-    } catch {
-      // Silently fail
+    } catch (err) {
+      console.error("Fetch error adding to watchlist:", err);
+      alert("Gagal koneksi ke server.");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="relative" ref={popoverRef}>
+    <div className="relative" ref={buttonRef}>
       <button
-        onClick={() => !isAdded && setIsOpen(!isOpen)}
+        onClick={handleToggle}
         disabled={isAdded || isLoading}
         className={cn(
           "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
@@ -83,7 +103,11 @@ export function AddToWatchlistButton({ symbol, name, companyName, currentPrice, 
       </button>
 
       {isOpen && !isAdded && (
-        <div className="absolute right-0 mt-2 w-48 bg-dark-900 border border-dark-700 rounded-xl shadow-2xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200">
+        <div 
+          ref={popoverRef}
+          className="fixed w-48 bg-dark-900 border border-dark-700 rounded-xl shadow-2xl overflow-hidden z-[9999] animate-in fade-in zoom-in-95 duration-200"
+          style={{ top: `${dropdownPos.top}px`, right: `${dropdownPos.right}px` }}
+        >
           <div className="p-2 border-b border-dark-800">
             <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 px-1">Pilih Group</p>
             <div className="space-y-1 max-h-40 overflow-y-auto">
