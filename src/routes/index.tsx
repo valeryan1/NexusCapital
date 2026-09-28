@@ -29,50 +29,55 @@ function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <main className="flex-1 flex flex-col items-center justify-center pt-32 pb-16 px-6 text-center relative overflow-hidden">
+      <main className="flex-1 flex flex-col items-center justify-center pt-24 pb-16 px-6 text-center relative overflow-hidden">
         {/* Background Gradients & Patterns */}
         <div className="absolute inset-0 bg-grid-pattern opacity-30"></div>
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[80%] max-w-[800px] h-[500px] bg-brand-500/20 rounded-full blur-[120px] pointer-events-none animate-glow"></div>
         
-        <div className="mx-auto max-w-5xl space-y-8 relative z-10 animate-fade-in">
+        <div className="mx-auto max-w-5xl space-y-6 relative z-10 animate-fade-in">
           <div className="inline-flex items-center rounded-full border border-brand-500/30 bg-brand-500/10 px-4 py-1.5 text-sm font-medium text-brand-400 shadow-[0_0_15px_rgba(255,122,0,0.1)]">
             <span className="flex size-2 rounded-full bg-brand-500 mr-2 animate-pulse-slow shadow-[0_0_5px_#FF7A00]"></span>
             System v2.0 Operational
           </div>
           
-          <h1 className="text-5xl font-extrabold tracking-tight sm:text-7xl lg:text-8xl text-white drop-shadow-md">
+          <h1 className="text-5xl font-extrabold tracking-tight sm:text-7xl lg:text-8xl text-white drop-shadow-md leading-[1.05]">
             Riset Saham Institusional <br className="hidden sm:block" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-500 to-orange-300">
               Bertenaga AI
             </span>
           </h1>
           
-          <p className="mx-auto max-w-2xl text-lg leading-relaxed text-gray-400 sm:text-xl">
+          <p className="mx-auto max-w-2xl text-lg leading-[1.6] text-gray-400 sm:text-xl">
             Mendemokratisasi intelijen finansial. Ubah data mentah IHSG menjadi riset mendalam, Skor Nexus eksklusif, dan <span className="italic">micro-report</span> otomatis hanya dalam <span className="text-white font-medium">~40 detik</span>.
           </p>
           
           {/* Guest Entry */}
-          <div className="w-full max-w-2xl mx-auto mt-8 text-left">
+          <div className="w-full max-w-3xl mx-auto pt-2 text-left">
             <Link
               to="/assistant"
               className="group relative block"
               aria-label="Buka Nexus Assistant tanpa login"
             >
               <div className="absolute -inset-1 bg-gradient-to-r from-brand-500 to-orange-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-              <div className="relative flex items-center gap-3 bg-dark-950 border border-dark-700 rounded-2xl p-3 shadow-2xl group-hover:border-brand-500/40">
-                <div className="size-9 shrink-0 rounded-full bg-brand-500 text-dark-950 flex items-center justify-center">
-                  <Sparkles className="size-4" />
+              <div className="relative flex flex-col sm:flex-row items-center gap-4 bg-dark-950 border border-dark-700 rounded-2xl p-4 sm:p-5 shadow-2xl group-hover:border-brand-500/40 transition-colors">
+                <div className="size-12 shrink-0 rounded-full bg-brand-500/10 text-brand-500 flex items-center justify-center border border-brand-500/20 shadow-[0_0_15px_rgba(255,122,0,0.1)] group-hover:scale-110 transition-transform">
+                  <Sparkles className="size-6" />
                 </div>
-                <span className="flex-1 truncate text-sm text-white font-medium">
-                  Tanya Nexus AI tentang saham (1x percobaan gratis)
-                </span>
-                <span className="flex items-center gap-2 rounded-xl bg-brand-500 text-dark-950 font-bold px-4 py-2.5 transition-colors group-hover:bg-brand-400">
-                  Buka <ArrowRight className="size-4" />
+                <div className="flex-1 text-center sm:text-left">
+                  <span className="block text-lg text-white font-bold">
+                    Tanya Nexus AI tentang saham apa pun
+                  </span>
+                  <span className="block text-sm text-brand-400 mt-1 font-medium">
+                    Coba 1x gratis sekarang tanpa perlu buat akun
+                  </span>
+                </div>
+                <span className="flex items-center gap-2 rounded-xl bg-brand-500 text-dark-950 font-bold px-6 py-3.5 transition-colors group-hover:bg-brand-400 w-full sm:w-auto justify-center shadow-[0_0_15px_rgba(255,122,0,0.3)]">
+                  Masuk Terminal <ArrowRight className="size-5" />
                 </span>
               </div>
             </Link>
-            <p className="mt-3 text-center text-xs text-gray-500">
-              Gratis tanpa login sampai token pertama habis, lalu masuk akun untuk mendapatkan 5 token.
+            <p className="mt-5 text-center text-xs leading-relaxed text-gray-500">
+              Dapatkan 5 token gratis setiap hari dengan mendaftarkan akun.
             </p>
           </div>
         </div>
