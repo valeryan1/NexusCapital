@@ -1,6 +1,9 @@
 import { getCompanyReport } from "./sectors.service.server";
+import { db } from "@/db/index.server";
+import { reports } from "@/db/schema";
+import crypto from "crypto";
 
-export async function generateResearchReport(ticker: string) {
+export async function generateResearchReport(ticker: string, userId: string) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY is not configured.");
@@ -28,26 +31,53 @@ export async function generateResearchReport(ticker: string) {
     Required JSON Schema:
     {
       "ticker": "${ticker}",
-      "companyName": "PT Example Tbk",
-      "sector": "Financials",
-      "currentPrice": 9800,
-      "priceChange": "+150 (+1.55%)",
+      "companyName": "PT Dian Swastatika Sentosa Tbk",
+      "sector": "Energy",
+      "subsector": "Coal",
+      "exchange": "Main Board · IDX",
+      "currentPrice": 35000,
+      "previousClose": 34500,
+      "priceChange": "+500 (+1.45%)",
+      "priceChangePercent": 1.45,
       "nexusScore": 82,
       "valuation": {
-        "per": { "value": 15.2, "status": "Healthy", "threshold": "< 15 is Undervalued" },
-        "pbv": { "value": 4.8, "status": "Overvalued", "threshold": "< 1.5 is Undervalued" },
-        "roe": { "value": 22.5, "status": "Healthy", "threshold": "> 15% is Healthy" },
-        "divYield": { "value": 2.1, "status": "Healthy", "threshold": "> 4% is High" },
-        "der": { "value": 0.15, "status": "Undervalued", "threshold": "< 1 is Healthy" }
+        "per": { "value": 13.26, "sectorAvg": 8.93, "status": "Overvalued", "threshold": "Sector avg 8.93x" },
+        "pbv": { "value": 2.82, "sectorAvg": 0.78, "status": "Overvalued", "threshold": "Sector avg 0.78x" },
+        "roe": { "value": 22.5, "sectorAvg": 16.2, "status": "Healthy", "threshold": "> 15% is Healthy" },
+        "divYield": { "value": 6.10, "sectorAvg": 4.94, "status": "Healthy", "threshold": "> 4% is High" },
+        "der": { "value": 0.15, "sectorAvg": 0.85, "status": "Undervalued", "threshold": "< 1 is Healthy" },
+        "ps": { "value": 6.68, "sectorAvg": 2.51, "status": "Overvalued", "threshold": "Sector avg 2.51x" },
+        "pcf": { "value": 11.08, "sectorAvg": 5.5, "status": "Overvalued", "threshold": "Sector avg 5.5x" },
+        "forwardPE": { "value": 12.95, "status": "Healthy", "threshold": "Forward looking" }
+      },
+      "priceRange": {
+        "low52w": 25000,
+        "high52w": 40000,
+        "low52wDate": "2023-06-09",
+        "high52wDate": "2023-10-30",
+        "allTimeHigh": 45000,
+        "allTimeHighDate": "2024-09-23",
+        "ytdHigh": 38000,
+        "ytdLow": 28000
       },
       "quantModels": {
         "piotroski": { "score": 8, "max": 9, "interpretation": "Exceptional Health", "color": "text-semantic-bull" },
         "altman": { "score": 3.8, "interpretation": "Safe Zone", "color": "text-semantic-bull" }
       },
       "intrinsicValue": {
-        "fairValue": 11500,
-        "marginOfSafety": 14.7, 
-        "model": "10Y Discounted Cash Flow"
+        "fairValue": 38000,
+        "marginOfSafety": 8.5, 
+        "model": "10Y Discounted Cash Flow",
+        "dcf": 38000,
+        "relative": 35000,
+        "ddm": 31000
+      },
+      "esgScore": {
+        "total": 21.71,
+        "rating": "Top ESG Performer",
+        "environmental": 18.5,
+        "social": 22.3,
+        "governance": 24.4
       },
       "foreignFlow": [
         { "date": "D-4", "flow": 150 },
@@ -56,35 +86,52 @@ export async function generateResearchReport(ticker: string) {
         { "date": "D-1", "flow": 850 },
         { "date": "Today", "flow": 1200 }
       ],
+      "institutionalFlows": [
+        { "name": "Vanguard", "change": 61979185 },
+        { "name": "Strategic Advisers LLC", "change": 45428500 },
+        { "name": "BlackRock Fund Advisors", "change": 23410540 },
+        { "name": "T. Rowe Price", "change": -173075700 },
+        { "name": "Capital Research & Mgmt.", "change": -203655628 },
+        { "name": "Fidelity Mgmt. & Research", "change": -490522692 }
+      ],
       "bandarmologi": {
         "status": "Massive Accumulation",
         "topBrokers": "RX, YU, KZ",
-        "summary": "Foreign institutions are actively accumulating..."
+        "summary": "Foreign institutions are actively accumulating, creating strong price floors."
+      },
+      "aiAnalysis": {
+        "executiveSummary": "...",
+        "fundamentalDeepDive": "...",
+        "technicalOutlook": "...",
+        "riskFactors": ["Risk 1", "Risk 2"]
       },
       "peers": [
-        { "subject": "ROE", "${ticker}": 22.5, "SectorAvg": 16.2, "fullMark": 25 },
-        { "subject": "NPM", "${ticker}": 48.2, "SectorAvg": 30.1, "fullMark": 50 },
-        { "subject": "CAR", "${ticker}": 28.5, "SectorAvg": 22.0, "fullMark": 30 },
-        { "subject": "CASA", "${ticker}": 81.0, "SectorAvg": 60.5, "fullMark": 100 },
-        { "subject": "Efficiency", "${ticker}": 85, "SectorAvg": 60, "fullMark": 100 }
+        { "subject": "Value", "${ticker}": 67, "SectorAvg": 50, "fullMark": 100 },
+        { "subject": "Growth", "${ticker}": 75, "SectorAvg": 55, "fullMark": 100 },
+        { "subject": "Health", "${ticker}": 90, "SectorAvg": 65, "fullMark": 100 },
+        { "subject": "Dividend", "${ticker}": 72, "SectorAvg": 60, "fullMark": 100 },
+        { "subject": "Momentum", "${ticker}": 58, "SectorAvg": 45, "fullMark": 100 }
       ],
-      "historicalBands": [
-        { "year": "2019", "per": 18, "pbv": 4.2 },
-        { "year": "2020", "per": 14, "pbv": 3.5 },
-        { "year": "2021", "per": 19, "pbv": 4.5 },
-        { "year": "2022", "per": 21, "pbv": 5.0 },
-        { "year": "2023", "per": 16, "pbv": 4.7 }
+      "peerComparison": [
+        { "ticker": "${ticker}", "name": "Main Company", "perf12m": -22.19, "marketCapFrom": 976.34, "marketCapTo": 759.71, "isSubject": true },
+        { "ticker": "ADRO", "name": "Adaro Energy", "perf12m": -21.11, "marketCapFrom": 597.17, "marketCapTo": 471.14, "isSubject": false }
       ],
       "ownership": {
         "data": [
           { "name": "Conglomerate", "value": 54.94, "color": "#FF7A00" },
           { "name": "Foreign Inst.", "value": 25.10, "color": "#3B82F6" },
-          { "name": "Retail", "value": 19.96, "color": "#10B981" }
+          { "name": "Retail / Public Float", "value": 19.96, "color": "#10B981" }
         ]
       },
+      "faqInsights": [
+        { "question": "What are the insiders doing with ${ticker}?", "iconName": "Briefcase", "title": "Insiders and institutional owners have recently made significant moves", "content": "..." },
+        { "question": "What should I know about ${ticker} market capitalization?", "iconName": "BarChart3", "title": "${ticker} is a top 30 market cap stock", "content": "..." },
+        { "question": "Does ${ticker} pay dividends?", "iconName": "Ticket", "title": "${ticker} is a dividend paying stock", "content": "..." },
+        { "question": "What about ${ticker}'s trading activity and liquidity?", "iconName": "Activity", "title": "${ticker} is heavily traded", "content": "..." },
+        { "question": "Would ${ticker} be good for ESG-conscious investors?", "iconName": "Leaf", "title": "${ticker} is a top ESG performer", "content": "..." }
+      ],
       "news": [
-        { "id": 1, "date": "2 Hrs Ago", "headline": "Example News", "sentiment": "Bullish", "tag": "Earnings" },
-        { "id": 2, "date": "5 Hrs Ago", "headline": "Example Macro News", "sentiment": "Neutral", "tag": "Macro" }
+        { "id": 1, "date": "Sep 26, 2026", "headline": "Example News", "summary": "News summary", "sentiment": "Bullish", "tags": ["Analyst Ratings", "Bullish"] }
       ]
     }
   `;
@@ -119,8 +166,32 @@ export async function generateResearchReport(ticker: string) {
   }
 
   try {
-    return JSON.parse(textOutput);
-  } catch {
+    const parsedData = JSON.parse(textOutput);
+    
+    // Save to Database
+    await db.insert(reports).values({
+      userId,
+      ticker: parsedData.ticker,
+      reportType: "full",
+      language: "en",
+      status: "completed",
+      nexusScore: parsedData.nexusScore,
+      scoreLabel: parsedData.nexusScore >= 65 ? "Bull" : "Bear", 
+      fundamentalAnalysis: JSON.stringify(parsedData.valuation),
+      technicalAnalysis: JSON.stringify(parsedData.bandarmologi),
+      finalSynthesis: JSON.stringify({ 
+        intrinsic: parsedData.intrinsicValue, 
+        quant: parsedData.quantModels,
+        aiAnalysis: parsedData.aiAnalysis 
+      }),
+      rawDataSnapshot: rawData,
+      requestId: crypto.randomUUID(),
+      tokensUsed: 1500, // Dummy token usage for demo
+    });
+
+    return parsedData;
+  } catch (err) {
+    console.error(err);
     throw new Error("AI returned invalid JSON format.");
   }
 }

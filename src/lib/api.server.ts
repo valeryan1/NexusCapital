@@ -31,8 +31,15 @@ export async function withApiSession(
 
     // Better Auth protects its own endpoints. Custom cookie-authenticated mutations need this check too.
     if (!["GET", "HEAD", "OPTIONS"].includes(request.method)) {
+      const origin = request.headers.get("origin");
+      const configuredOrigin = new URL(env.BETTER_AUTH_URL).origin;
+      
+      // Di mode development, toleransi perbedaan antara 127.0.0.1 dan localhost
+      const isDevLocal = process.env.NODE_ENV !== "production" && 
+                        (origin?.includes("localhost") || origin?.includes("127.0.0.1") || origin?.includes("192.168."));
+                        
       if (
-        request.headers.get("origin") !== new URL(env.BETTER_AUTH_URL).origin ||
+        !isDevLocal && origin !== configuredOrigin ||
         request.headers.get("sec-fetch-site") === "cross-site"
       )
         throw new ApiError(

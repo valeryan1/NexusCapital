@@ -17,7 +17,7 @@ function AuthLayout() {
 
       <header className="absolute top-0 left-0 right-0 z-10 flex h-32 items-center justify-center px-6 mt-8">
         <Link to="/" className="flex items-center justify-center cursor-pointer group">
-          <div className="w-[160px] h-[160px] flex shrink-0 items-center justify-center transition-all group-hover:scale-105">
+          <div className="w-[240px] h-[102px] flex shrink-0 items-center justify-center transition-all group-hover:scale-105">
             <img src="/logo.png" alt="NexusCapital" className="w-full h-full object-contain drop-shadow-xl" />
           </div>
         </Link>

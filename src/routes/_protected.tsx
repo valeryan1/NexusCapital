@@ -15,7 +15,9 @@ import {
   Calculator,
   Landmark,
   User,
-  Sparkles
+  Sparkles,
+  Activity,
+  Star
 } from "lucide-react";
 import { cn } from "cn";
 import { Brand } from "@/components/brand";
@@ -34,11 +36,12 @@ const navItemsWorkspace = [
   { id: "research", label: "Research Studio", icon: Bot, path: "/research" },
   { id: "valuation", label: "Valuation Screener", icon: Calculator, path: "/valuation" },
   { id: "ipo", label: "IPO", icon: Landmark, path: "/ipo" },
+  { id: "sectors", label: "Sectors Dashboard", icon: Activity, path: "/sectors/banks" },
   { id: "alerts", label: "Micro-Alerts", icon: Zap, path: "/alerts", badge: "3" },
 ];
 
 const navItemsIntegration = [
-  // { id: "watchlist", label: "Watchlist", icon: Star, path: "/watchlist" },
+  { id: "watchlist", label: "Watchlist", icon: Star, path: "/watchlist" },
   { id: "billing", label: "Billing", icon: Settings, path: "/billing" },
 ];
 
@@ -71,11 +74,14 @@ function ProtectedLayout() {
         return;
       }
     };
+    const refreshNotifications = () => void load();
     void load();
     const interval = window.setInterval(load, 60_000);
+    window.addEventListener("nexus:notifications-updated", refreshNotifications);
     return () => {
       active = false;
       window.clearInterval(interval);
+      window.removeEventListener("nexus:notifications-updated", refreshNotifications);
     };
   }, []);
 
@@ -121,10 +127,17 @@ function ProtectedLayout() {
   return (
     <div className="flex h-screen overflow-hidden bg-background text-gray-300 font-sans antialiased selection:bg-brand-500 selection:text-white">
       {/* Sidebar */}
+      {/* Mobile Backdrop */}
+      {mobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 z-30 md:hidden backdrop-blur-sm"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
       <aside className={cn(
-        "flex-shrink-0 border-r border-dark-800 bg-dark-900 flex-col z-20 relative transition-all duration-300",
+        "flex-shrink-0 border-r border-dark-800 bg-dark-900 flex-col z-40 relative transition-all duration-300",
         isCollapsed ? "w-20" : "w-64",
-        mobileMenuOpen ? "flex absolute inset-y-0 left-0" : "hidden md:flex"
+        mobileMenuOpen ? "flex fixed inset-y-0 left-0" : "hidden md:flex"
       )}>
         {/* Logo */}
         <div className="h-28 flex items-center justify-center px-4 border-b border-dark-800 bg-dark-900/50 backdrop-blur-sm z-10 w-full overflow-hidden">
@@ -257,7 +270,7 @@ function ProtectedLayout() {
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col h-screen overflow-hidden bg-gradient-to-br from-[#16161A] via-[#0E0E12] to-[#09090B] relative">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden bg-background relative">
         {/* Ambient Background Glow and Grid */}
         <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] pointer-events-none mix-blend-screen"></div>
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,122,0,0.08)_0%,transparent_60%)] pointer-events-none"></div>

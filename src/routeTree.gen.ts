@@ -27,6 +27,7 @@ import { Route as ProtectedResearchRouteImport } from './routes/_protected/resea
 import { Route as ProtectedValuationRouteImport } from './routes/_protected/valuation'
 import { Route as ProtectedWatchlistRouteImport } from './routes/_protected/watchlist'
 import { Route as ProtectedReportIdRouteImport } from './routes/_protected/report/$id'
+import { Route as ProtectedSectorsSectorIdRouteImport } from './routes/_protected/sectors/$sectorId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiChatIndexRouteImport } from './routes/api/chat/index'
 import { Route as ApiCreditsIndexRouteImport } from './routes/api/credits/index'
@@ -127,6 +128,12 @@ const ProtectedReportIdRoute = ProtectedReportIdRouteImport.update({
   path: '/report/$id',
   getParentRoute: () => ProtectedRoute,
 } as any)
+const ProtectedSectorsSectorIdRoute =
+  ProtectedSectorsSectorIdRouteImport.update({
+    id: '/sectors/$sectorId',
+    path: '/sectors/$sectorId',
+    getParentRoute: () => ProtectedRoute,
+  } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -201,6 +208,7 @@ export interface FileRoutesByFullPath {
   '/valuation': typeof ProtectedValuationRoute
   '/watchlist': typeof ProtectedWatchlistRoute
   '/report/$id': typeof ProtectedReportIdRoute
+  '/sectors/$sectorId': typeof ProtectedSectorsSectorIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
   '/api/watchlist/$symbol': typeof ApiWatchlistSymbolRoute
@@ -230,6 +238,7 @@ export interface FileRoutesByTo {
   '/valuation': typeof ProtectedValuationRoute
   '/watchlist': typeof ProtectedWatchlistRoute
   '/report/$id': typeof ProtectedReportIdRoute
+  '/sectors/$sectorId': typeof ProtectedSectorsSectorIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
   '/api/watchlist/$symbol': typeof ApiWatchlistSymbolRoute
@@ -262,6 +271,7 @@ export interface FileRoutesById {
   '/_protected/valuation': typeof ProtectedValuationRoute
   '/_protected/watchlist': typeof ProtectedWatchlistRoute
   '/_protected/report/$id': typeof ProtectedReportIdRoute
+  '/_protected/sectors/$sectorId': typeof ProtectedSectorsSectorIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
   '/api/watchlist/$symbol': typeof ApiWatchlistSymbolRoute
@@ -293,6 +303,7 @@ export interface FileRouteTypes {
     | '/valuation'
     | '/watchlist'
     | '/report/$id'
+    | '/sectors/$sectorId'
     | '/api/auth/$'
     | '/api/notes/$id'
     | '/api/watchlist/$symbol'
@@ -322,6 +333,7 @@ export interface FileRouteTypes {
     | '/valuation'
     | '/watchlist'
     | '/report/$id'
+    | '/sectors/$sectorId'
     | '/api/auth/$'
     | '/api/notes/$id'
     | '/api/watchlist/$symbol'
@@ -353,6 +365,7 @@ export interface FileRouteTypes {
     | '/_protected/valuation'
     | '/_protected/watchlist'
     | '/_protected/report/$id'
+    | '/_protected/sectors/$sectorId'
     | '/api/auth/$'
     | '/api/notes/$id'
     | '/api/watchlist/$symbol'
@@ -511,6 +524,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedReportIdRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/sectors/$sectorId': {
+      id: '/_protected/sectors/$sectorId'
+      path: '/sectors/$sectorId'
+      fullPath: '/sectors/$sectorId'
+      preLoaderRoute: typeof ProtectedSectorsSectorIdRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -617,6 +637,7 @@ interface ProtectedRouteChildren {
   ProtectedValuationRoute: typeof ProtectedValuationRoute
   ProtectedWatchlistRoute: typeof ProtectedWatchlistRoute
   ProtectedReportIdRoute: typeof ProtectedReportIdRoute
+  ProtectedSectorsSectorIdRoute: typeof ProtectedSectorsSectorIdRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
@@ -633,6 +654,7 @@ const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedValuationRoute: ProtectedValuationRoute,
   ProtectedWatchlistRoute: ProtectedWatchlistRoute,
   ProtectedReportIdRoute: ProtectedReportIdRoute,
+  ProtectedSectorsSectorIdRoute: ProtectedSectorsSectorIdRoute,
 }
 
 const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(

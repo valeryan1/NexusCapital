@@ -2,6 +2,8 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
+/* The app only sets a `light` class on <html>; dark is the unclassed default. */
+@custom-variant light (&:is(.light *));
 
 @theme inline {
   --color-background: var(--background);
@@ -87,32 +89,38 @@
   --ds-gray-300: #D1D5DB;
   --ds-gray-400: #9CA3AF;
   --ds-gray-500: #6B7280;
+  
+  --glass-bg: rgba(24, 24, 27, 0.7);
+  --glass-border: rgba(63, 63, 70, 0.5);
 }
 
 .light {
-  --background: #F4F4F5;
+  --background: #FAFAFA;
   --foreground: #09090B;
   --card: #FFFFFF;
   --card-foreground: #09090B;
   --primary: #FF7A00;
   --primary-foreground: #FFFFFF;
-  --secondary: #E4E4E7;
-  --muted: #E4E4E7;
+  --secondary: #F4F4F5;
+  --muted: #F4F4F5;
   --muted-foreground: #52525B;
   --accent: #FFA64D;
   --accent-foreground: #09090B;
-  --border: #D4D4D8;
-  --destructive: #F43F5E;
+  --border: #E4E4E7;
+  --destructive: #E11D48; /* Slightly deeper red for light mode */
 
   /* Inverted Theme Variables for Light Mode */
-  --ds-dark-950: #F4F4F5; /* Background */
-  --ds-dark-900: #FFFFFF; /* Cards */
+  --ds-dark-950: #FAFAFA; /* Soft light background */
+  --ds-dark-900: #FFFFFF; /* Pure white cards */
   --ds-dark-800: #E4E4E7; /* Borders/Hover */
   --ds-dark-700: #D4D4D8; /* Deeper Borders */
-  --ds-white: #09090B;    /* Text that was white is now black */
-  --ds-gray-300: #4B5563; /* Darker gray for text */
-  --ds-gray-400: #6B7280;
-  --ds-gray-500: #9CA3AF;
+  --ds-white: #000000;    /* Pure black for maximum clarity on titles */
+  --ds-gray-300: #1F2937; /* Very dark gray for readability */
+  --ds-gray-400: #374151; /* Dark gray for subtitles */
+  --ds-gray-500: #4B5563; /* Medium gray */
+  
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(228, 228, 231, 0.6);
 }
 
 .dark {
@@ -130,6 +138,9 @@
   --accent-foreground: #09090B;
   --border: #3F3F46;
   --destructive: #F43F5E;
+  
+  --glass-bg: rgba(24, 24, 27, 0.7);
+  --glass-border: rgba(63, 63, 70, 0.5);
 }
 
 @layer base {
@@ -167,7 +178,8 @@
     background-size: 24px 24px;
   }
   .glass {
-    background: rgba(24, 24, 27, 0.7);
+    background: var(--glass-bg);
+    border-color: var(--glass-border);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
   }

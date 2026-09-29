@@ -1,5 +1,4 @@
 {
-  "version": "7",
   "dialect": "postgresql",
   "entries": [
     {
@@ -26,9 +25,17 @@
     {
       "idx": 3,
       "version": "7",
-      "when": 1790325901584,
-      "tag": "0003_watchlist_and_credits",
+      "when": 1790512317048,
+      "tag": "0003_equal_rafael_vega",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790523622387,
+      "tag": "0004_eager_madripoor",
       "breakpoints": true
     }
-  ]
+  ],
+  "version": "7"
 }

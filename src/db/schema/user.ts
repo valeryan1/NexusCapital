@@ -1,4 +1,4 @@
-import { boolean, pgTable, text, timestamp, integer } from "drizzle-orm/pg-core";
+import { boolean, pgTable, text, timestamp, integer, uuid } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -18,4 +18,9 @@ export const user = pgTable("user", {
     .defaultNow()
     .$onUpdate(() => new Date())
     .notNull(),
+  creditBalance: integer("credit_balance").default(20).notNull(),
+  defaultTenantId: uuid("default_tenant_id"), // Not strictly referencing tenants to avoid circular issues, but conceptually points to tenants.id
+  status: text("status").default("active").notNull(),
+  locale: text("locale").default("id").notNull(),
+  lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
 });

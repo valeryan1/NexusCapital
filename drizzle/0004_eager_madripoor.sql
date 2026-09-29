@@ -1,0 +1,1 @@
+ALTER TABLE "watchlist" ADD COLUMN "group_name" text DEFAULT 'Default' NOT NULL;
