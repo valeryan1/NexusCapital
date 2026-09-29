@@ -34,11 +34,7 @@ function LandingPage() {
         <div className="absolute inset-0 bg-grid-pattern opacity-30"></div>
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[80%] max-w-[800px] h-[500px] bg-brand-500/20 rounded-full blur-[120px] pointer-events-none animate-glow"></div>
         
-        <div className="mx-auto max-w-5xl space-y-6 relative z-10 animate-fade-in">
-          <div className="inline-flex items-center rounded-full border border-brand-500/30 bg-brand-500/10 px-4 py-1.5 text-sm font-medium text-brand-400 shadow-[0_0_15px_rgba(255,122,0,0.1)]">
-            <span className="flex size-2 rounded-full bg-brand-500 mr-2 animate-pulse-slow shadow-[0_0_5px_#FF7A00]"></span>
-            System v2.0 Operational
-          </div>
+        <div className="mx-auto max-w-5xl space-y-6 relative z-10 animate-fade-in pt-8">
           
           <h1 className="text-5xl font-extrabold tracking-tight sm:text-7xl lg:text-8xl text-white drop-shadow-md leading-[1.05]">
             Riset Saham Institusional <br className="hidden sm:block" />
