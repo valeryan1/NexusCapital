@@ -44,7 +44,7 @@ function LandingPage() {
           </h1>
           
           <p className="mx-auto max-w-2xl text-lg leading-[1.6] text-gray-400 sm:text-xl">
-            Mendemokratisasi intelijen finansial. Ubah data mentah IHSG menjadi riset mendalam, Skor Nexus eksklusif, dan <span className="italic">micro-report</span> otomatis hanya dalam <span className="text-white font-medium">~40 detik</span>.
+            Mendemokratisasi intelijen finansial. Ubah data mentah IHSG menjadi riset mendalam, Skor Nexus eksklusif, dan <span className="italic">micro-report</span> otomatis hanya dalam <span className="text-white font-medium">40 detik</span>.
           </p>
           
           {/* Guest Entry */}
@@ -81,7 +81,7 @@ function LandingPage() {
         {/* Multi-Agent Architecture Section */}
         <div id="architecture" className="mx-auto mt-32 max-w-7xl relative z-10 w-full animate-fade-in" style={{ animationDelay: '0.2s' }}>
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-white mb-4">Arsitektur Multi-Agent AI</h2>
+            <h2 className="text-3xl font-bold text-white mb-4">Arsitektur Multi Agent AI</h2>
             <p className="text-gray-400 max-w-2xl mx-auto">Agen AI khusus kami bekerja secara independen untuk menganalisis, menguji sentimen, dan menyintesis data pasar demi menghasilkan riset komprehensif tanpa bias.</p>
           </div>
           

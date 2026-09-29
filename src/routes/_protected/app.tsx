@@ -69,7 +69,7 @@ function OverviewPage() {
               <div className="flex items-center gap-3 mb-3">
                 <h2 className="text-2xl font-bold text-white">Generate Research</h2>
                 <span className="bg-brand-500/10 text-brand-400 border border-brand-500/20 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
-                  <Sparkles className="size-3" /> AI Multi-Agent
+                  <Sparkles className="size-3" /> AI Multi Agent
                 </span>
               </div>
               <p className="text-gray-300 text-sm mb-6 max-w-xl">
