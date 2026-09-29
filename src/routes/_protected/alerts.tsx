@@ -73,30 +73,29 @@ function AlertsPage() {
                 <thead className="text-[10px] text-gray-500 uppercase bg-dark-950 border-b border-dark-800">
                   <tr>
                     <th className="px-5 py-3">Rule Name & Target</th>
-                    <th className="px-5 py-3">Algorithmic Logic (Conditions)</th>
-                    <th className="px-5 py-3">Type</th>
+                    <th className="px-5 py-3">Algorithmic Logic (Conditions) &amp; Type</th>
                     <th className="px-5 py-3 text-right">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-dark-800">
                   {mockRules.map((rule) => (
-                    <tr key={rule.id} className="hover:bg-dark-800/50 transition-colors group cursor-pointer">
+                    <tr key={rule.id} className="hover:bg-dark-800/30 transition-colors group">
                       <td className="px-5 py-4">
                         <div className="font-bold text-gray-200 group-hover:text-white">{rule.name}</div>
                         <div className="text-[10px] text-brand-500 font-mono mt-1">{rule.ticker}</div>
                       </td>
                       <td className="px-5 py-4">
-                        <div className="font-mono text-xs text-gray-300 bg-dark-950 p-2 rounded border border-dark-700">
-                          {rule.condition.split(' AND ').map((c, i, arr) => (
-                            <span key={i}>
-                              <span className="text-emerald-400">{c}</span>
-                              {i < arr.length - 1 && <span className="text-brand-500 font-bold mx-1">AND</span>}
-                            </span>
-                          ))}
+                        <div className="flex flex-col gap-2 items-start">
+                          <div className="font-mono text-xs text-gray-300 bg-dark-950 p-2 rounded border border-dark-700">
+                            {rule.condition.split(' AND ').map((c, i, arr) => (
+                              <span key={i}>
+                                <span className="text-emerald-400">{c}</span>
+                                {i < arr.length - 1 && <span className="text-brand-500 font-bold mx-1">AND</span>}
+                              </span>
+                            ))}
+                          </div>
+                          <span className="text-[10px] font-bold text-gray-400 bg-dark-800 px-2 py-1 rounded uppercase tracking-wider">{rule.type}</span>
                         </div>
-                      </td>
-                      <td className="px-5 py-4">
-                        <span className="text-[10px] font-bold text-gray-400 bg-dark-800 px-2 py-1 rounded">{rule.type}</span>
                       </td>
                       <td className="px-5 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
