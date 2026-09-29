@@ -3,12 +3,9 @@ import { siteConfig } from "@/config/site";
 import { 
   BarChart2, 
   Search, 
-  TrendingUp, 
-  TrendingDown,
   Activity,
   Globe,
   PieChart as PieChartIcon,
-  CheckCircle2,
   ShieldAlert,
   Target,
   ArrowRightLeft,
@@ -39,21 +36,13 @@ import {
   PolarGrid, 
   PolarAngleAxis,
   BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  ReferenceLine
+  Bar
 } from "recharts";
 import { NexusScoreGauge } from "@/components/nexus-score-gauge";
 import { Sparkles, Loader2 } from "lucide-react";
 import { createServerFn } from "@tanstack/react-start";
-import { getRequestHeaders } from "@tanstack/react-start/server";
 import { AddToWatchlistButton } from "@/components/add-to-watchlist-button";
-import { generateResearchReport } from "@/services/research.service.server";
-import { getSession } from "@/lib/session.server";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 
 const generateReportFn = createServerFn({ method: 'POST' })
   .validator((ticker: string) => ticker)
@@ -239,15 +228,7 @@ const mockResearchData = {
 // HELPER COMPONENTS
 // ==========================================
 
-const StatusBadge = ({ status }: { status: string }) => {
-  if (status === "Undervalued") {
-    return <span className="flex items-center gap-1 text-[10px] font-bold text-semantic-bull bg-semantic-bull/10 px-1.5 py-0.5 rounded uppercase border border-semantic-bull/20"><TrendingDown className="size-3" /> Undervalued</span>;
-  }
-  if (status === "Overvalued") {
-    return <span className="flex items-center gap-1 text-[10px] font-bold text-semantic-bear bg-semantic-bear/10 px-1.5 py-0.5 rounded uppercase border border-semantic-bear/20"><TrendingUp className="size-3" /> Overvalued</span>;
-  }
-  return <span className="flex items-center gap-1 text-[10px] font-bold text-gray-300 bg-gray-500/20 px-1.5 py-0.5 rounded uppercase border border-gray-500/30"><CheckCircle2 className="size-3" /> Healthy</span>;
-};
+
 
 // Feature 2: Valuation Marker Bar
 function MarkerBar({ value, min, max, sectorAvg, label }: { value: number; min: number; max: number; sectorAvg?: number; label: string }) {
