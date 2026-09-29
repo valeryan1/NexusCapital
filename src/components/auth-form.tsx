@@ -75,7 +75,7 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
       </h1>
       <p className="text-sm leading-relaxed text-gray-400">
         {signingUp
-          ? "Create your institutional research profile to access the Multi-Agent Swarm."
+          ? "Create your institutional research profile to access the Multi Agent Swarm."
           : "Access your dashboard and deploy AI agents."}
       </p>
       <form

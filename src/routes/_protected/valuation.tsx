@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { siteConfig } from "@/config/site";
-import { Search, SlidersHorizontal, AlertCircle, Filter, GripVertical, X, Sparkles } from "lucide-react";
+import { Search, SlidersHorizontal, AlertCircle, Filter, GripVertical, X, Sparkles, Check } from "lucide-react";
 import { useState } from "react";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
@@ -93,6 +93,29 @@ export const Route = createFileRoute("/_protected/valuation")({
   component: ValuationPage,
 });
 
+const PRESETS: Record<string, { label: string; symbols: string[] }> = {
+  bigbank: { label: "Top 4 Big Banks", symbols: ["BBCA.JK", "BMRI.JK", "BBRI.JK", "BBNI.JK"] },
+  lq45: {
+    label: "Indeks LQ45",
+    symbols: ["ACES.JK","ADRO.JK","AKRA.JK","AMRT.JK","ANTM.JK","ARTO.JK","ASII.JK","BBCA.JK","BBNI.JK","BBRI.JK","BBTN.JK","BMRI.JK","BRPT.JK","BUKA.JK","CPIN.JK","EMTK.JK","ESSA.JK","EXCL.JK","GGRM.JK","GOTO.JK","HRUM.JK","ICBP.JK","INCO.JK","INDF.JK","INKP.JK","INTP.JK","ISAT.JK","ITMG.JK","KLBF.JK","MAPI.JK","MBMA.JK","MDKA.JK","MEDC.JK","MTEL.JK","PGAS.JK","PGEO.JK","PTBA.JK","SIDO.JK","SMGR.JK","SRTG.JK","TLKM.JK","TOWR.JK","TPIA.JK","UNTR.JK","UNVR.JK"],
+  },
+  idx30: {
+    label: "Indeks IDX30",
+    symbols: ["ACES.JK","ADRO.JK","AKRA.JK","AMRT.JK","ANTM.JK","ARTO.JK","ASII.JK","BBCA.JK","BBNI.JK","BBRI.JK","BMRI.JK","BRPT.JK","BUKA.JK","CPIN.JK","EMTK.JK","EXCL.JK","GOTO.JK","HRUM.JK","ICBP.JK","INCO.JK","INDF.JK","INKP.JK","INTP.JK","ITMG.JK","KLBF.JK","MDKA.JK","PGAS.JK","PTBA.JK","SMGR.JK","TLKM.JK","TOWR.JK","UNTR.JK","UNVR.JK"],
+  },
+  jii: {
+    label: "Jakarta Islamic Index (JII)",
+    symbols: ["ACES.JK","ADRO.JK","AKRA.JK","AMRT.JK","ANTM.JK","BRPT.JK","CPIN.JK","EXCL.JK","HRUM.JK","ICBP.JK","INCO.JK","INDF.JK","INKP.JK","INTP.JK","ITMG.JK","KLBF.JK","MDKA.JK","PGAS.JK","PTBA.JK","SMGR.JK","TLKM.JK","TPIA.JK","UNTR.JK","UNVR.JK"],
+  },
+  energy: { label: "Sektor Energi & Tambang", symbols: ["ADRO.JK","PTBA.JK","ITMG.JK","HRUM.JK","INDY.JK","BUMI.JK","ENRG.JK","MEDC.JK","PGEO.JK","PGAS.JK","AKRA.JK","BIPI.JK","DOID.JK","MBSS.JK"] },
+  consumer: { label: "Sektor Consumer Goods", symbols: ["ICBP.JK","INDF.JK","UNVR.JK","MYOR.JK","SIDO.JK","CLEO.JK","GOOD.JK","GGRM.JK","HMSP.JK","KAEF.JK","KLBF.JK","TSPC.JK"] },
+  tech: { label: "Sektor Teknologi", symbols: ["GOTO.JK","BUKA.JK","BELI.JK","EMTK.JK","WIRG.JK","MLPT.JK"] },
+  undervalue: {
+    label: "Pilihan Saham Undervalue",
+    symbols: ["ASII.JK","UNTR.JK","BNGA.JK","NISP.JK","BDMN.JK","BJTM.JK","BJBR.JK","ITMG.JK","PTBA.JK","ADRO.JK","INDF.JK","AUTO.JK","SMSM.JK"],
+  },
+};
+
 function ValuationPage() {
   const [activeFilters, setActiveFilters] = useState<string[]>(['per', 'pbv']);
   const [maxPer, setMaxPer] = useState<number | "">(15);
@@ -101,7 +124,7 @@ function ValuationPage() {
   const [maxDer, setMaxDer] = useState<number | "">(1.5);
   const [minYield, setMinYield] = useState<number | "">(0);
   const [minMarketCap, setMinMarketCap] = useState<number | "">(1); // in Trillions
-  const [preset, setPreset] = useState<string>("bigbank");
+  const [presets, setPresets] = useState<string[]>(["bigbank"]);
   const [isSearching, setIsSearching] = useState(false);
   const [stocks, setStocks] = useState<Array<{
     ticker: string;
@@ -158,15 +181,10 @@ function ValuationPage() {
       if (activeFilters.includes('yield')) conditions.push(`yield_ttm ${minYield !== "" ? ">= " + (Number(minYield) / 100) : ">= 0"}`);
       if (activeFilters.includes('marketcap') && minMarketCap !== "")
         conditions.push(`market_cap >= ${Number(minMarketCap) * 1000000000000}`);
-      if (activeFilters.includes('preset')) {
-        if (preset === "bigbank") conditions.push(`symbol in ('BBCA.JK','BMRI.JK','BBRI.JK','BBNI.JK')`);
-        if (preset === "lq45") conditions.push(`symbol in ('ACES.JK','ADRO.JK','AKRA.JK','AMRT.JK','ANTM.JK','ARTO.JK','ASII.JK','BBCA.JK','BBNI.JK','BBRI.JK','BBTN.JK','BMRI.JK','BRPT.JK','BUKA.JK','CPIN.JK','EMTK.JK','ESSA.JK','EXCL.JK','GGRM.JK','GOTO.JK','HRUM.JK','ICBP.JK','INCO.JK','INDF.JK','INKP.JK','INTP.JK','ISAT.JK','ITMG.JK','KLBF.JK','MAPI.JK','MBMA.JK','MDKA.JK','MEDC.JK','MTEL.JK','PGAS.JK','PGEO.JK','PTBA.JK','SIDO.JK','SMGR.JK','SRTG.JK','TLKM.JK','TOWR.JK','TPIA.JK','UNTR.JK','UNVR.JK')`);
-        if (preset === "idx30") conditions.push(`symbol in ('ACES.JK','ADRO.JK','AKRA.JK','AMRT.JK','ANTM.JK','ARTO.JK','ASII.JK','BBCA.JK','BBNI.JK','BBRI.JK','BMRI.JK','BRPT.JK','BUKA.JK','CPIN.JK','EMTK.JK','EXCL.JK','GOTO.JK','HRUM.JK','ICBP.JK','INCO.JK','INDF.JK','INKP.JK','INTP.JK','ITMG.JK','KLBF.JK','MDKA.JK','PGAS.JK','PTBA.JK','SMGR.JK','TLKM.JK','TOWR.JK','UNTR.JK','UNVR.JK')`);
-        if (preset === "jii") conditions.push(`symbol in ('ACES.JK','ADRO.JK','AKRA.JK','AMRT.JK','ANTM.JK','BRPT.JK','CPIN.JK','EXCL.JK','HRUM.JK','ICBP.JK','INCO.JK','INDF.JK','INKP.JK','INTP.JK','ITMG.JK','KLBF.JK','MDKA.JK','PGAS.JK','PTBA.JK','SMGR.JK','TLKM.JK','TPIA.JK','UNTR.JK','UNVR.JK')`);
-        if (preset === "energy") conditions.push(`symbol in ('ADRO.JK','PTBA.JK','ITMG.JK','HRUM.JK','INDY.JK','BUMI.JK','ENRG.JK','MEDC.JK','PGEO.JK','PGAS.JK','AKRA.JK','BIPI.JK','DOID.JK','MBSS.JK')`);
-        if (preset === "consumer") conditions.push(`symbol in ('ICBP.JK','INDF.JK','UNVR.JK','MYOR.JK','SIDO.JK','CLEO.JK','GOOD.JK','GGRM.JK','HMSP.JK','KAEF.JK','KLBF.JK','TSPC.JK')`);
-        if (preset === "tech") conditions.push(`symbol in ('GOTO.JK','BUKA.JK','BELI.JK','EMTK.JK','WIRG.JK','MLPT.JK')`);
-        if (preset === "undervalue") conditions.push(`symbol in ('ASII.JK','UNTR.JK','BNGA.JK','NISP.JK','BDMN.JK','BJTM.JK','BJBR.JK','ITMG.JK','PTBA.JK','ADRO.JK','INDF.JK','AUTO.JK','SMSM.JK')`);
+      if (activeFilters.includes('preset') && presets.length > 0) {
+        const symbols = [...new Set(presets.flatMap((id) => PRESETS[id]?.symbols ?? []))];
+        if (symbols.length > 0)
+          conditions.push(`symbol in (${symbols.map((s) => `'${s}'`).join(",")})`);
       }
       conditions.push(`last_close_price > 0`);
       conditions.push(`sector != ''`);
@@ -469,22 +487,34 @@ function ValuationPage() {
                       <X className="size-3.5" />
                     </button>
                   </label>
-                  <select 
-                    value={preset}
-                    onChange={(e) => setPreset(e.target.value)}
-                    className="block w-full px-4 py-2.5 border border-dark-700 rounded-lg bg-dark-950 text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-brand-500 focus:border-brand-500 sm:text-sm transition-colors hover:border-dark-600 appearance-none"
-                  >
-                    <option value="bigbank">Top 4 Big Banks</option>
-                    <option value="lq45">Indeks LQ45</option>
-                    <option value="idx30">Indeks IDX30</option>
-                    <option value="jii">Jakarta Islamic Index (JII)</option>
-                    <option value="energy">Sektor Energi & Tambang</option>
-                    <option value="consumer">Sektor Consumer Goods</option>
-                    <option value="tech">Sektor Teknologi</option>
-                    <option value="undervalue">Pilihan Saham Undervalue</option>
-                  </select>
-                  <p className="text-[10px] text-gray-500 mt-1.5 leading-relaxed">
-                    Saring berdasarkan daftar saham pilihan.
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(PRESETS).map(([id, { label, symbols }]) => {
+                      const active = presets.includes(id);
+                      return (
+                        <button
+                          key={id}
+                          type="button"
+                          onClick={() =>
+                            setPresets((prev) =>
+                              active ? prev.filter((p) => p !== id) : [...prev, id],
+                            )
+                          }
+                          aria-pressed={active}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all flex items-center gap-1.5 ${
+                            active
+                              ? "bg-brand-500/15 text-brand-400 border-brand-500/40"
+                              : "bg-dark-950 text-gray-400 border-dark-700 hover:border-brand-500/40 hover:text-white"
+                          }`}
+                        >
+                          {active && <Check className="size-3" />}
+                          {label}
+                          <span className="text-[10px] opacity-60">{symbols.length}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-[10px] text-gray-500 mt-2 leading-relaxed">
+                    Bisa pilih beberapa preset sekaligus. Saham yang sama dari preset berbeda digabung otomatis.
                   </p>
                 </div>
               )}

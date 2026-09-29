@@ -36,7 +36,7 @@ import {
   PolarGrid, 
   PolarAngleAxis,
   BarChart,
-  Bar
+  Bar,
 } from "recharts";
 import { NexusScoreGauge } from "@/components/nexus-score-gauge";
 import { Sparkles, Loader2 } from "lucide-react";
@@ -228,8 +228,6 @@ const mockResearchData = {
 // HELPER COMPONENTS
 // ==========================================
 
-
-
 // Feature 2: Valuation Marker Bar
 function MarkerBar({ value, min, max, sectorAvg, label }: { value: number; min: number; max: number; sectorAvg?: number; label: string }) {
   const range = max - min;
@@ -338,10 +336,10 @@ function PriceRangeBar({ low, high, current }: { low: number; high: number; curr
           <div className="w-1.5 h-5 bg-brand-500 rounded-full ring-2 ring-brand-500/30 shadow-[0_0_10px_rgba(255,122,0,0.5)]" />
         </div>
       </div>
-      <p className="text-xs text-gray-400 text-center">
+      <p className="text-xs text-gray-500 text-center font-medium mt-3">
         Current: <span className="text-white font-bold">IDR {current.toLocaleString('id-ID')}</span>
         <span className="text-gray-600 mx-1">·</span>
-        <span className="text-brand-500 font-medium">{((high - current) / high * 100).toFixed(1)}% off 52w high</span>
+        <span className="text-brand-500 font-bold">{((high - current) / high * 100).toFixed(1)}% off 52w high</span>
       </p>
     </div>
   );
@@ -371,18 +369,18 @@ function FaqAccordionItem({ question, iconName, title, content, isOpen, onToggle
     <div className="border-b border-dark-800 last:border-b-0">
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between gap-4 py-4 px-4 text-left text-sm font-medium text-gray-400 hover:text-white transition-colors group"
+        className="w-full flex items-center justify-between gap-4 py-4 px-4 text-left text-sm font-medium text-white light:text-gray-700 light:hover:text-gray-900 transition-colors group"
       >
-        <span className={`transition-colors ${isOpen ? 'text-white' : ''}`}>{question}</span>
-        <ChevronDown className={`size-4 shrink-0 text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180 text-brand-500' : ''}`} />
+        <span className={`transition-colors ${isOpen ? 'text-white light:text-gray-900' : ''}`}>{question}</span>
+        <ChevronDown className={`size-4 shrink-0 text-white light:text-gray-600 transition-transform duration-200 ${isOpen ? 'rotate-180 text-brand-500' : ''}`} />
       </button>
       {isOpen && (
         <div className="px-4 pb-5 animate-in slide-in-from-top-2 duration-200">
-          <h4 className="text-sm font-bold text-white flex items-center gap-2 mb-2">
+          <h4 className="text-sm font-bold text-white light:text-gray-900 flex items-center gap-2 mb-2">
             <Icon className="size-4 text-brand-500" />
             {title}
           </h4>
-          <p className="text-sm text-gray-400 leading-relaxed">{content}</p>
+          <p className="text-sm text-white light:text-gray-700 font-medium leading-relaxed">{content}</p>
         </div>
       )}
     </div>
@@ -441,7 +439,7 @@ const AI_SECTIONS = [
     icon: Sparkles,
     color: "text-brand-500",
     activeColor: "border-brand-500",
-    bgActive: "bg-brand-500/5",
+    bgActive: "bg-brand-500/10",
     getContent: (a: AiAnalysis) => a.executiveSummary,
     getSnippet: (a: AiAnalysis) => a.executiveSummary.substring(0, 60) + "...",
   },
@@ -496,7 +494,7 @@ function AiSynthesisPanel({ aiAnalysis, ticker }: { aiAnalysis: AiAnalysis; tick
   return (
     <div className="border-t border-dark-800 pt-8 pb-2 print-mb">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest">AI Synthesis &amp; Deep Dive</h2>
+        <h2 className="text-xs font-bold text-white light:text-gray-900 uppercase tracking-widest">AI Synthesis &amp; Deep Dive</h2>
         <span className="text-[10px] font-bold text-brand-500 bg-brand-500/10 border border-brand-500/20 px-2 py-0.5 rounded uppercase tracking-widest">
           {ticker} · AI Orchestrator
         </span>
@@ -519,7 +517,7 @@ function AiSynthesisPanel({ aiAnalysis, ticker }: { aiAnalysis: AiAnalysis; tick
                   <p className={`text-[11px] font-bold uppercase tracking-widest mb-1 transition-colors ${isActive ? section.color : "text-gray-500 group-hover:text-gray-300"}`}>
                     {section.label}
                   </p>
-                  <p className="text-[12px] text-gray-600 group-hover:text-gray-500 truncate font-light transition-colors leading-relaxed">
+                  <p className="text-[12px] text-white light:text-gray-700 light:group-hover:text-gray-800 truncate font-light transition-colors leading-relaxed">
                     {section.getSnippet(aiAnalysis)}
                   </p>
                 </div>
@@ -544,12 +542,12 @@ function AiSynthesisPanel({ aiAnalysis, ticker }: { aiAnalysis: AiAnalysis; tick
                 {aiAnalysis.riskFactors.map((risk, i) => (
                   <li key={i} className="flex items-start gap-3">
                     <span className="text-semantic-bear mt-1.5 text-xs">•</span>
-                    <p className="text-[15px] text-gray-200 leading-relaxed font-light">{risk}</p>
+                    <p className="text-[15px] text-white light:text-gray-800 leading-relaxed font-light">{risk}</p>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-[16px] text-gray-200 leading-loose font-light">
+              <p className="text-[16px] text-white light:text-gray-800 leading-loose font-light">
                 {activeSection.getContent(aiAnalysis)}
               </p>
             )}
@@ -668,9 +666,9 @@ function ResearchStudio() {
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
             <BarChart2 className="size-6 text-brand-500" />
-            Institutional Research Studio
+            Research Studio
           </h1>
-          <p className="text-gray-400 text-sm mt-1">Advanced equity analysis, quant models, and foreign flow tracking.</p>
+          <p className="text-gray-400 text-sm mt-1">Analisis ekuitas tingkat lanjut, model kuantitatif, dan pelacakan aliran dana asing.</p>
         </div>
         <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
           <div className="relative w-full md:w-64">
@@ -789,18 +787,18 @@ function ResearchStudio() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center bg-dark-950 p-3 rounded-lg border border-dark-800">
                   <div>
-                    <div className="text-sm font-bold text-gray-200">Piotroski F-Score</div>
-                    <div className="text-[10px] text-gray-500">Financial Trend Strength</div>
+                    <div className="text-sm font-bold text-white light:text-gray-900">Piotroski F-Score</div>
+                    <div className="text-[10px] text-white light:text-gray-700">Financial Trend Strength</div>
                   </div>
                   <div className="text-right">
-                    <div className="text-xl font-black text-semantic-bull">{data.quantModels.piotroski.score}<span className="text-sm text-gray-500">/9</span></div>
+                    <div className="text-xl font-black text-semantic-bull">{data.quantModels.piotroski.score}<span className="text-sm text-white light:text-gray-700">/9</span></div>
                     <div className="text-[10px] font-bold text-semantic-bull uppercase">{data.quantModels.piotroski.interpretation}</div>
                   </div>
                 </div>
                 <div className="flex justify-between items-center bg-dark-950 p-3 rounded-lg border border-dark-800">
                   <div>
-                    <div className="text-sm font-bold text-gray-200">Altman Z-Score</div>
-                    <div className="text-[10px] text-gray-500">Bankruptcy Probability</div>
+                    <div className="text-sm font-bold text-white light:text-gray-900">Altman Z-Score</div>
+                    <div className="text-[10px] text-white light:text-gray-700">Bankruptcy Probability</div>
                   </div>
                   <div className="text-right">
                     <div className="text-xl font-black text-semantic-bull">{data.quantModels.altman.score}</div>
@@ -1171,8 +1169,8 @@ function ResearchStudio() {
             <div className="p-3 bg-brand-500/5 border border-brand-500/20 rounded-lg">
               <div className="flex items-start gap-2">
                 <Briefcase className="size-4 text-brand-500 shrink-0 mt-0.5" />
-                <p className="text-xs text-gray-400 leading-relaxed">
-                  <strong className="text-gray-200">AI Insight:</strong> {data.bandarmologi.summary}
+                <p className="text-xs text-gray-500 font-medium leading-relaxed">
+                  <strong className="text-white light:text-gray-900">AI Insight:</strong> {data.bandarmologi.summary}
                 </p>
               </div>
             </div>

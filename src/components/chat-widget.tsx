@@ -84,7 +84,7 @@ export function ChatWidget() {
                 <Bot className="size-4 text-brand-500" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-white">
+                <p className="text-sm font-semibold text-white light:text-gray-900">
                   NexusCapital AI
                 </p>
                 <p className="text-[10px] text-semantic-bull flex items-center gap-1">
@@ -121,7 +121,7 @@ export function ChatWidget() {
                     "max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap",
                     msg.role === "user"
                       ? "bg-brand-500 text-white rounded-br-md"
-                      : "bg-dark-800 text-gray-200 rounded-bl-md border border-dark-700",
+                      : "bg-dark-800 text-white light:text-gray-900 rounded-bl-md border border-dark-700",
                   )}
                 >
                   {msg.content}
@@ -160,7 +160,7 @@ export function ChatWidget() {
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ketik pesan Anda..."
                 disabled={isLoading}
-                className="flex-1 bg-transparent text-sm text-white placeholder:text-gray-500 outline-none py-1"
+                className="flex-1 bg-transparent text-sm text-white light:text-gray-900 placeholder:text-gray-500 outline-none py-1"
               />
               <button
                 type="submit"

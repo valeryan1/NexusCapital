@@ -6,7 +6,7 @@ export async function getWatchlist(userId: string) {
   return db.select().from(watchlist).where(eq(watchlist.userId, userId));
 }
 
-export async function addToWatchlist(userId: string, symbol: string, name?: string) {
+export async function addToWatchlist(userId: string, symbol: string, name?: string, groupName: string = "Default") {
   const existing = await db
     .select()
     .from(watchlist)
@@ -14,6 +14,14 @@ export async function addToWatchlist(userId: string, symbol: string, name?: stri
     .limit(1);
 
   if (existing.length > 0) {
+    if (existing[0].groupName !== groupName) {
+      const updated = await db
+        .update(watchlist)
+        .set({ groupName })
+        .where(eq(watchlist.id, existing[0].id))
+        .returning();
+      return updated[0];
+    }
     return existing[0];
   }
 
@@ -24,6 +32,7 @@ export async function addToWatchlist(userId: string, symbol: string, name?: stri
       userId,
       symbol,
       name,
+      groupName,
     })
     .returning();
 

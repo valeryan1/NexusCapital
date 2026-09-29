@@ -1,6 +1,6 @@
 {
-  "id": "7ff442ae-75c7-4554-bcf9-d64fcd9bd6fc",
-  "prevId": "e3a0c800-8e72-4817-8f9f-ef0d64a6029a",
+  "id": "fe926d22-701d-4702-bd74-47fc6ab742cc",
+  "prevId": "7ff442ae-75c7-4554-bcf9-d64fcd9bd6fc",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -554,6 +554,13 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "group_name": {
+          "name": "group_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Default'"
         },
         "created_at": {
           "name": "created_at",
