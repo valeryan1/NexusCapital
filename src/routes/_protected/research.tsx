@@ -41,6 +41,7 @@ import {
 import { NexusScoreGauge } from "@/components/nexus-score-gauge";
 import { Sparkles, Loader2 } from "lucide-react";
 import { createServerFn } from "@tanstack/react-start";
+import { getRequestHeaders } from "@tanstack/react-start/server";
 import { AddToWatchlistButton } from "@/components/add-to-watchlist-button";
 import { Badge } from "@/components/ui/badge";
 
@@ -67,13 +68,93 @@ const generateReportFn = createServerFn({ method: 'POST' })
     }
   });
 
+// Shape guard for valuation: real valuation lives in the fundamental_analysis
+// column ({ per, pbv, ps } each { value, sectorAvg }), older data may nest it
+// under finalSynthesis.quant. rawDataSnapshot.valuation is raw Sectors API data
+// with a different shape — never use it. Always return the full mock shape,
+// overriding per/pbv/ps only when the stored data validates.
+function parseJsonColumn(value: unknown): Record<string, unknown> | null {
+  if (typeof value !== "string" || !value.trim()) return null;
+  try {
+    const parsed: unknown = JSON.parse(value);
+    return parsed !== null && typeof parsed === "object"
+      ? (parsed as Record<string, unknown>)
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function buildValuation(
+  fundamental: Record<string, unknown> | null,
+  finalSynthesis: Record<string, unknown>,
+): typeof mockResearchData.valuation {
+  const mock = mockResearchData.valuation;
+  const valid = (v: unknown): v is (typeof mock)["per"] =>
+    v !== null &&
+    typeof v === "object" &&
+    typeof (v as Record<string, unknown>).value === "number";
+  const per = fundamental ? (fundamental.per ?? fundamental.pe) : null;
+  if (fundamental && valid(per) && valid(fundamental.pbv) && valid(fundamental.ps)) {
+    return { ...mock, per, pbv: fundamental.pbv, ps: fundamental.ps };
+  }
+  const quant = finalSynthesis.quant as Record<string, unknown> | undefined;
+  if (quant && valid(quant.pe) && valid(quant.pbv) && valid(quant.ps)) {
+    return { ...mock, per: quant.pe, pbv: quant.pbv, ps: quant.ps };
+  }
+  return mock;
+}
+
+const loadSavedReportFn = createServerFn({ method: 'GET' })
+  .validator((ticker: string) => ticker)
+  .handler(async ({ data }) => {
+    const [{ getSession }, { getLatestResearchByTicker }] = await Promise.all([
+      import("@/lib/session.server"),
+      import("@/services/research.service.server"),
+    ]);
+    const session = await getSession(
+      getRequestHeaders() as unknown as Headers,
+    );
+    if (!session) throw new Error("Unauthorized");
+
+    const saved = await getLatestResearchByTicker(session.user.id, data);
+    if (!saved) return null;
+
+    const finalSynthesis = parseJsonColumn(saved.finalSynthesis) ?? {};
+    const fundamental = parseJsonColumn(saved.fundamentalAnalysis);
+    const technical = parseJsonColumn(saved.technicalAnalysis) as
+      | (typeof mockResearchData)["bandarmologi"]
+      | null;
+    // NOTE: the raw Sectors API snapshot is deliberately NOT spread into the
+    // result. Its `valuation`/`ownership`/`peers` keys collide with UI fields
+    // under different shapes and crash the render (ownership.data.map etc.).
+    // Every UI field is mapped explicitly below; unknown-shape data falls back
+    // to the mock. ponytail: raw snapshot could later feed dedicated sections.
+
+    return {
+      ...mockResearchData,
+      ticker: saved.ticker,
+      companyName: saved.companyName,
+      nexusScore:
+        typeof saved.nexusScore === "number"
+          ? saved.nexusScore
+          : mockResearchData.nexusScore,
+      valuation: buildValuation(fundamental, finalSynthesis),
+      quantModels: (finalSynthesis).quant ?? mockResearchData.quantModels,
+      intrinsicValue: (finalSynthesis).intrinsic ?? mockResearchData.intrinsicValue,
+      aiAnalysis: (finalSynthesis).aiAnalysis ?? mockResearchData.aiAnalysis,
+      bandarmologi: technical ?? mockResearchData.bandarmologi,
+    };
+  });
+
 export const Route = createFileRoute("/_protected/research")({
   head: () => ({ meta: [{ title: `Research Studio | ${siteConfig.name}` }] }),
-  validateSearch: (search: Record<string, unknown>): { q?: string; auto?: boolean } => {
+  validateSearch: (search: Record<string, unknown>): { q?: string; auto?: boolean; fromHistory?: boolean } => {
     return {
       q: typeof search.q === 'string' ? search.q : undefined,
-      auto: search.auto === true || search.auto === 'true'
-    }
+      auto: search.auto === true || search.auto === 'true',
+      fromHistory: search.fromHistory === true || search.fromHistory === 'true',
+    };
   },
   component: ResearchStudio,
 });
@@ -570,7 +651,6 @@ function ResearchStudio() {
   const [loadingStep, setLoadingStep] = useState(0);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
-  const autoRunRef = useRef(search.auto);
 
   const handleGenerate = useCallback(async (targetTicker?: string) => {
     const t = typeof targetTicker === 'string' ? targetTicker : tickerInput;
@@ -589,6 +669,7 @@ function ResearchStudio() {
       });
       setData(report);
       window.dispatchEvent(new Event("nexus:credits-updated"));
+      window.dispatchEvent(new Event("nexus:recents-updated"));
     } catch (error: unknown) {
       console.error(error);
       const msg = error instanceof Error ? error.message : "Gagal menghubungi AI Server (Kemungkinan Server Google Gemini sedang sibuk/overload). Silakan coba lagi.";
@@ -600,12 +681,56 @@ function ResearchStudio() {
     }
   }, [isLoading, tickerInput]);
 
-  useEffect(() => {
-    if (autoRunRef.current && search.q) {
-      handleGenerate(search.q);
-      autoRunRef.current = false;
+  const loadSavedReport = useCallback(async (targetTicker?: string) => {
+    const t = typeof targetTicker === 'string' ? targetTicker : tickerInput;
+    if (!t.trim() || isLoading) return;
+    setIsLoading(true);
+    setErrorMsg(null);
+
+    try {
+      const savedReport = await loadSavedReportFn({ data: t.toUpperCase() });
+      if (!savedReport) {
+        setErrorMsg("Riwayat penelitian untuk ticker ini belum tersedia. Coba generate ulang.");
+        return;
+      }
+      setData(savedReport as typeof mockResearchData);
+      setTickerInput(t.toUpperCase());
+    } catch (error: unknown) {
+      console.error(error);
+      const msg = error instanceof Error ? error.message : "Gagal membuka riwayat penelitian yang tersimpan.";
+      setErrorMsg(msg);
+    } finally {
+      setIsLoading(false);
     }
-  }, [handleGenerate, search.q]);
+  }, [isLoading, tickerInput]);
+
+  // Keep latest callbacks in refs so the search-param effect below runs only
+  // when the URL actually changes, not when isLoading/tickerInput churn the
+  // useCallback identities (that loop re-fired generateReportFn = burned credits).
+  const handleGenerateRef = useRef(handleGenerate);
+  const loadSavedReportRef = useRef(loadSavedReport);
+  useEffect(() => {
+    handleGenerateRef.current = handleGenerate;
+    loadSavedReportRef.current = loadSavedReport;
+  });
+
+  useEffect(() => {
+    // Mutually exclusive: a saved history entry must never trigger the paid
+    // generation API, even if a stale `auto=true` survives in the URL.
+    if (search.fromHistory && search.q) {
+      const timeoutId = window.setTimeout(() => {
+        void loadSavedReportRef.current(search.q);
+      }, 0);
+      return () => window.clearTimeout(timeoutId);
+    }
+
+    if (search.auto && search.q) {
+      const timeoutId = window.setTimeout(() => {
+        void handleGenerateRef.current(search.q);
+      }, 0);
+      return () => window.clearTimeout(timeoutId);
+    }
+  }, [search.auto, search.fromHistory, search.q]);
 
   // Feature 3: Process institutional flows for the chart
   const maxAbsFlow = Math.max(...data.institutionalFlows.map(f => Math.abs(f.change)));
@@ -640,7 +765,13 @@ function ResearchStudio() {
       </div>
       
       {/* LOADING OVERLAY */}
-      {isLoading && (
+      {isLoading && loadingStep === 0 && (
+        <div className="absolute inset-0 z-50 bg-background/90 backdrop-blur-md rounded-xl flex flex-col items-center justify-center border border-dark-800">
+          <Loader2 className="size-10 text-brand-500 animate-spin mb-4" />
+          <p className="text-sm font-medium text-gray-300">Memuat riwayat penelitian tersimpan...</p>
+        </div>
+      )}
+      {isLoading && loadingStep > 0 && (
         <div className="absolute inset-0 z-50 bg-background/90 backdrop-blur-md rounded-xl flex flex-col items-center justify-center border border-brand-500/20 shadow-[0_0_50px_rgba(255,122,0,0.15)]">
           <Loader2 className="size-14 text-brand-500 animate-spin mb-6 shadow-[0_0_15px_rgba(255,122,0,0.5)] rounded-full" />
           <h3 className="text-2xl font-black text-white mb-6 uppercase tracking-wider">Multi-Agent Swarm Active</h3>

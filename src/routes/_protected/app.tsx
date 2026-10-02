@@ -55,7 +55,7 @@ function OverviewPage() {
     if (!ticker.trim()) return;
     navigate({
       to: "/research",
-      search: { q: ticker.trim().toUpperCase(), auto: true }
+      search: { q: ticker.trim().toUpperCase(), auto: true, fromHistory: false }
     });
   };
 
