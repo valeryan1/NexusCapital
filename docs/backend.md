@@ -39,6 +39,23 @@ Single-item responses wrap a note in `data`. Each note contains `id`, `title`, `
 
 Errors use `{ "error": { "code": "...", "message": "..." } }`, with field `details` for validation errors. Statuses are 400 for malformed JSON, 401 for missing/invalid sessions, 403 for rejected origins, 404 for missing or unowned records, 415 for unsupported content types, 422 for invalid input, and 500 for unexpected failures. Missing and unowned records have identical responses. Database exceptions and private values are not returned. Application API responses use `Cache-Control: private, no-store`.
 
+## Chat history endpoints
+
+Riwayat percakapan Nexus Assistant memakai pola yang sama seperti Notes: dua tabel (`chat_conversations`, `chat_messages`), service `src/services/chat.service.server.ts`, dan validator `src/validators/chat.ts`.
+
+| Method | Path                                          | Result                                                        |
+| ------ | --------------------------------------------- | ------------------------------------------------------------- |
+| GET    | `/api/chat/conversations?limit=50`            | 200, percakapan milik pengguna, terbaru yang diubah di atas |
+| POST   | `/api/chat/conversations`                     | 201, membuat percakapan kosong (judul opsional)                |
+| GET    | `/api/chat/conversations/:id`                 | 200, satu percakapan beserta seluruh pesannya                  |
+| PATCH  | `/api/chat/conversations/:id`                 | 200, mengganti judul                                           |
+| DELETE | `/api/chat/conversations/:id`                 | 204, percakapan dan pesannya dihapus (cascade)                |
+| POST   | `/api/chat/conversations/:id/messages`        | 200, menyimpan pesan lalu mengembalikan `{ reply, credits }`   |
+
+Judul diambil otomatis dari pesan pertama pengguna (satu baris, maksimal 60 karakter). Percakapan baru dibuat saat pesan pertama dikirim, bukan saat halaman dibuka, sehingga tidak ada baris kosong. `POST .../messages` membangun konteks AI dari database (12 pesan terakhir), memotong satu credit, dan mengembalikan credit itu bila AI gagal; respons 402 `INSUFFICIENT_CREDITS` muncul sebelum pemanggilan AI ketika saldo habis.
+
+Endpoint `/api/chat` yang dipakai widget customer service tetap terpisah dan tidak menyimpan riwayat.
+
 ## Role-based access
 
 Ownership answers "is this row mine?". Roles answer "may this account reach past its own rows?". The starter ships a worked example of the second question using the Better Auth admin plugin.

@@ -41,6 +41,7 @@ import {
 import { NexusScoreGauge } from "@/components/nexus-score-gauge";
 import { Sparkles, Loader2 } from "lucide-react";
 import { createServerFn } from "@tanstack/react-start";
+import { getRequestHeaders } from "@tanstack/react-start/server";
 import { AddToWatchlistButton } from "@/components/add-to-watchlist-button";
 import { Badge } from "@/components/ui/badge";
 
