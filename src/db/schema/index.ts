@@ -4,6 +4,7 @@ export * from "./session";
 export * from "./account";
 export * from "./verification";
 export * from "./notes";
+export * from "./chat";
 export * from "./watchlist";
 export * from "./tenants";
 export * from "./tenant_members";

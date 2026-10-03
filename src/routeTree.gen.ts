@@ -41,6 +41,9 @@ import { Route as ApiWatchlistSymbolRouteImport } from './routes/api/watchlist/$
 import { Route as ApiWatchlistNotificationsRouteImport } from './routes/api/watchlist/notifications'
 import { Route as ApiAdminNotesIndexRouteImport } from './routes/api/admin/notes/index'
 import { Route as ApiAdminNotesIdRouteImport } from './routes/api/admin/notes/$id'
+import { Route as ApiChatConversationsIndexRouteImport } from './routes/api/chat/conversations/index'
+import { Route as ApiChatConversationsIdRouteImport } from './routes/api/chat/conversations/$id'
+import { Route as ApiChatConversationsIdMessagesRouteImport } from './routes/api/chat/conversations/$id/messages'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -202,6 +205,23 @@ const ApiAdminNotesIdRoute = ApiAdminNotesIdRouteImport.update({
   path: '/api/admin/notes/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiChatConversationsIndexRoute =
+  ApiChatConversationsIndexRouteImport.update({
+    id: '/api/chat/conversations/',
+    path: '/api/chat/conversations/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiChatConversationsIdRoute = ApiChatConversationsIdRouteImport.update({
+  id: '/api/chat/conversations/$id',
+  path: '/api/chat/conversations/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiChatConversationsIdMessagesRoute =
+  ApiChatConversationsIdMessagesRouteImport.update({
+    id: '/messages',
+    path: '/messages',
+    getParentRoute: () => ApiChatConversationsIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -233,7 +253,10 @@ export interface FileRoutesByFullPath {
   '/api/notes/': typeof ApiNotesIndexRoute
   '/api/watchlist/': typeof ApiWatchlistIndexRoute
   '/api/admin/notes/$id': typeof ApiAdminNotesIdRoute
+  '/api/chat/conversations/$id': typeof ApiChatConversationsIdRouteWithChildren
   '/api/admin/notes/': typeof ApiAdminNotesIndexRoute
+  '/api/chat/conversations/': typeof ApiChatConversationsIndexRoute
+  '/api/chat/conversations/$id/messages': typeof ApiChatConversationsIdMessagesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -265,7 +288,10 @@ export interface FileRoutesByTo {
   '/api/notes': typeof ApiNotesIndexRoute
   '/api/watchlist': typeof ApiWatchlistIndexRoute
   '/api/admin/notes/$id': typeof ApiAdminNotesIdRoute
+  '/api/chat/conversations/$id': typeof ApiChatConversationsIdRouteWithChildren
   '/api/admin/notes': typeof ApiAdminNotesIndexRoute
+  '/api/chat/conversations': typeof ApiChatConversationsIndexRoute
+  '/api/chat/conversations/$id/messages': typeof ApiChatConversationsIdMessagesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -300,7 +326,10 @@ export interface FileRoutesById {
   '/api/notes/': typeof ApiNotesIndexRoute
   '/api/watchlist/': typeof ApiWatchlistIndexRoute
   '/api/admin/notes/$id': typeof ApiAdminNotesIdRoute
+  '/api/chat/conversations/$id': typeof ApiChatConversationsIdRouteWithChildren
   '/api/admin/notes/': typeof ApiAdminNotesIndexRoute
+  '/api/chat/conversations/': typeof ApiChatConversationsIndexRoute
+  '/api/chat/conversations/$id/messages': typeof ApiChatConversationsIdMessagesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -334,7 +363,10 @@ export interface FileRouteTypes {
     | '/api/notes/'
     | '/api/watchlist/'
     | '/api/admin/notes/$id'
+    | '/api/chat/conversations/$id'
     | '/api/admin/notes/'
+    | '/api/chat/conversations/'
+    | '/api/chat/conversations/$id/messages'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -366,7 +398,10 @@ export interface FileRouteTypes {
     | '/api/notes'
     | '/api/watchlist'
     | '/api/admin/notes/$id'
+    | '/api/chat/conversations/$id'
     | '/api/admin/notes'
+    | '/api/chat/conversations'
+    | '/api/chat/conversations/$id/messages'
   id:
     | '__root__'
     | '/'
@@ -400,7 +435,10 @@ export interface FileRouteTypes {
     | '/api/notes/'
     | '/api/watchlist/'
     | '/api/admin/notes/$id'
+    | '/api/chat/conversations/$id'
     | '/api/admin/notes/'
+    | '/api/chat/conversations/'
+    | '/api/chat/conversations/$id/messages'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -418,7 +456,9 @@ export interface RootRouteChildren {
   ApiNotesIndexRoute: typeof ApiNotesIndexRoute
   ApiWatchlistIndexRoute: typeof ApiWatchlistIndexRoute
   ApiAdminNotesIdRoute: typeof ApiAdminNotesIdRoute
+  ApiChatConversationsIdRoute: typeof ApiChatConversationsIdRouteWithChildren
   ApiAdminNotesIndexRoute: typeof ApiAdminNotesIndexRoute
+  ApiChatConversationsIndexRoute: typeof ApiChatConversationsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -647,6 +687,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminNotesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/chat/conversations/': {
+      id: '/api/chat/conversations/'
+      path: '/api/chat/conversations'
+      fullPath: '/api/chat/conversations/'
+      preLoaderRoute: typeof ApiChatConversationsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/chat/conversations/$id': {
+      id: '/api/chat/conversations/$id'
+      path: '/api/chat/conversations/$id'
+      fullPath: '/api/chat/conversations/$id'
+      preLoaderRoute: typeof ApiChatConversationsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/chat/conversations/$id/messages': {
+      id: '/api/chat/conversations/$id/messages'
+      path: '/messages'
+      fullPath: '/api/chat/conversations/$id/messages'
+      preLoaderRoute: typeof ApiChatConversationsIdMessagesRouteImport
+      parentRoute: typeof ApiChatConversationsIdRoute
+    }
   }
 }
 
@@ -702,6 +763,20 @@ const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
   ProtectedRouteChildren,
 )
 
+interface ApiChatConversationsIdRouteChildren {
+  ApiChatConversationsIdMessagesRoute: typeof ApiChatConversationsIdMessagesRoute
+}
+
+const ApiChatConversationsIdRouteChildren: ApiChatConversationsIdRouteChildren =
+  {
+    ApiChatConversationsIdMessagesRoute: ApiChatConversationsIdMessagesRoute,
+  }
+
+const ApiChatConversationsIdRouteWithChildren =
+  ApiChatConversationsIdRoute._addFileChildren(
+    ApiChatConversationsIdRouteChildren,
+  )
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRouteWithChildren,
@@ -717,7 +792,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiNotesIndexRoute: ApiNotesIndexRoute,
   ApiWatchlistIndexRoute: ApiWatchlistIndexRoute,
   ApiAdminNotesIdRoute: ApiAdminNotesIdRoute,
+  ApiChatConversationsIdRoute: ApiChatConversationsIdRouteWithChildren,
   ApiAdminNotesIndexRoute: ApiAdminNotesIndexRoute,
+  ApiChatConversationsIndexRoute: ApiChatConversationsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
