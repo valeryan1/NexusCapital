@@ -61,32 +61,7 @@ function ProtectedLayout() {
   const [notifications, setNotifications] = useState<WatchlistNotification[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [credits, setCredits] = useState<number | null>(null);
-  const [recentProjects, setRecentProjects] = useState<
-    { id: string; ticker: string; companyName?: string | null }[]
-  >([]);
   const unreadCount = notifications.filter((item) => !item.readAt).length;
-
-  useEffect(() => {
-    let active = true;
-    const loadRecentProjects = async () => {
-      try {
-        const response = await fetch("/api/research/history");
-        const body = (await response.json().catch(() => null)) as {
-          data?: { id: string; ticker: string; companyName?: string | null }[];
-        } | null;
-        if (response.ok && active && body?.data) setRecentProjects(body.data.slice(0, 8));
-      } catch {
-        return;
-      }
-    };
-    const refreshRecents = () => void loadRecentProjects();
-    void loadRecentProjects();
-    window.addEventListener("nexus:recents-updated", refreshRecents);
-    return () => {
-      active = false;
-      window.removeEventListener("nexus:recents-updated", refreshRecents);
-    };
-  }, []);
 
   useEffect(() => {
     let active = true;
@@ -207,29 +182,7 @@ function ProtectedLayout() {
             );
           })}
 
-          {recentProjects.length > 0 && !isCollapsed && (
-            <div className="mt-8 mb-4 px-3">
-              <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-3">Recent</p>
-              <div className="space-y-2">
-                {recentProjects.map((project) => (
-                  <Link
-                    key={project.id}
-                    to="/research"
-                    search={{ q: project.ticker, fromHistory: true, auto: false }}
-                    className="block rounded-lg border border-dark-700 bg-dark-950/80 px-2.5 py-2 text-sm text-gray-300 transition-colors hover:border-brand-500/40 hover:text-white"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <span className="block text-[10px] font-bold uppercase tracking-wider text-brand-500">
-                      {project.ticker}
-                    </span>
-                    <span className="mt-1 block truncate text-xs text-gray-400">
-                      {project.companyName || project.ticker}
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
+
 
           {!isCollapsed && <p className="px-3 text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-3 mt-8">Integration</p>}
           {isCollapsed && <div className="h-8 border-t border-dark-800/50 mt-4 pt-4"></div>}

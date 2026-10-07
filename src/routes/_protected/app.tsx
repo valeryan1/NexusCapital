@@ -15,17 +15,32 @@ import {
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
-import { getTrendingStocks } from "@/services/sectors.service.server";
 import { AddToWatchlistButton } from "@/components/add-to-watchlist-button";
+
+import { getRequestHeaders } from "@tanstack/react-start/server";
 
 const fetchDashboardStatsFn = createServerFn({ method: "GET" })
   .handler(async () => {
     try {
-      const stocks = await getTrendingStocks();
-      return { stocks };
+      const [{ getSession }, { getTrendingStocks }, { getDashboardStats }] = await Promise.all([
+        import("@/lib/session.server"),
+        import("@/services/sectors.service.server"),
+        import("@/services/dashboard.service.server"),
+      ]);
+      const session = await getSession(getRequestHeaders() as unknown as Headers);
+      if (!session) throw new Error("Unauthorized");
+
+      const [stocks, stats] = await Promise.all([
+        getTrendingStocks(),
+        getDashboardStats(session.user.id)
+      ]);
+      return { stocks, stats };
     } catch (error) {
       console.error(error);
-      return { stocks: [] };
+      return { 
+        stocks: [], 
+        stats: { credits: 0, totalReports: 0, activeAlerts: 0, tokensProcessed: "0" } 
+      };
     }
   });
 
@@ -49,7 +64,7 @@ const getScore = (change: number) => {
 function OverviewPage() {
   const navigate = useNavigate();
   const [ticker, setTicker] = useState("");
-  const { stocks } = Route.useLoaderData();
+  const { stocks, stats } = Route.useLoaderData();
 
   const handleRunAgents = () => {
     if (!ticker.trim()) return;
@@ -126,9 +141,9 @@ function OverviewPage() {
           </div>
           <div className="relative z-10">
             <p className="text-sm font-medium text-gray-400">Available Credits</p>
-            <h3 className="text-3xl font-bold text-white mt-2">1,240 <span className="text-sm font-normal text-gray-500">/ 2000</span></h3>
+            <h3 className="text-3xl font-bold text-white mt-2">{stats.credits} <span className="text-sm font-normal text-gray-500">/ 2000</span></h3>
             <div className="w-full bg-dark-950 rounded-full h-1.5 mt-4 border border-dark-800">
-              <div className="bg-gradient-to-r from-brand-500 to-orange-400 h-1.5 rounded-full" style={{ width: '62%' }}></div>
+              <div className="bg-gradient-to-r from-brand-500 to-orange-400 h-1.5 rounded-full" style={{ width: `${Math.min(100, Math.max(0, (stats.credits / 2000) * 100))}%` }}></div>
             </div>
             <p className="text-xs text-gray-500 mt-2">API key resets in 12 days</p>
           </div>
@@ -139,7 +154,7 @@ function OverviewPage() {
           <div>
             <p className="text-sm font-medium text-gray-400">Laporan Riset Dibuat</p>
             <div className="flex items-end gap-3 mt-2">
-              <h3 className="text-3xl font-bold text-white">348</h3>
+              <h3 className="text-3xl font-bold text-white">{stats.totalReports}</h3>
               <span className="flex items-center gap-1 text-sm font-medium text-semantic-bull mb-1 bg-semantic-bull/10 px-1.5 py-0.5 rounded border border-semantic-bull/20">
                 <TrendingUp className="size-3" /> +12%
               </span>
@@ -160,7 +175,7 @@ function OverviewPage() {
           <div className="flex justify-between items-start mb-4">
             <div>
               <p className="text-sm font-medium text-gray-400">Micro-Alerts Aktif</p>
-              <h3 className="text-3xl font-bold text-white mt-2">3</h3>
+              <h3 className="text-3xl font-bold text-white mt-2">{stats.activeAlerts}</h3>
             </div>
             <div className="w-10 h-10 rounded-lg bg-dark-950 border border-dark-800 flex items-center justify-center text-brand-400 relative">
               <Radar className="size-5 animate-pulse-slow" />
@@ -169,7 +184,7 @@ function OverviewPage() {
           </div>
           <div className="space-y-2 mt-4">
             <div className="flex items-center gap-2 text-xs text-gray-400 bg-dark-950 px-2 py-1.5 rounded border border-dark-800">
-              <span className="w-1.5 h-1.5 rounded-full bg-brand-500"></span> Watching <strong className="text-white">WIFI</strong> drops
+              <span className="w-1.5 h-1.5 rounded-full bg-brand-500"></span> Active alerts monitoring
             </div>
           </div>
         </div>
@@ -179,7 +194,7 @@ function OverviewPage() {
           <div className="flex justify-between items-start mb-4">
             <div>
               <p className="text-sm font-medium text-gray-400">Token Terproses</p>
-              <h3 className="text-3xl font-bold text-white mt-2">1.2M</h3>
+              <h3 className="text-3xl font-bold text-white mt-2">{stats.tokensProcessed}</h3>
             </div>
             <div className="w-10 h-10 rounded-lg bg-dark-950 border border-dark-800 flex items-center justify-center text-purple-400">
               <Brain className="size-5" />

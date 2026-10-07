@@ -272,7 +272,7 @@ export async function getResearchHistory(userId: string) {
 }
 
 export async function generateResearchReport(ticker: string, userId: string) {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.OPENROUTER_API_KEY;
   const useDummyResearch =
     process.env.NODE_ENV === "test" || process.env.USE_DUMMY_RESEARCH === "true";
 
@@ -296,7 +296,7 @@ export async function generateResearchReport(ticker: string, userId: string) {
   }
 
   if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is not configured.");
+    throw new Error("OPENROUTER_API_KEY is not configured.");
   }
 
   // 1. Get raw data from Sectors API
@@ -314,6 +314,7 @@ export async function generateResearchReport(ticker: string, userId: string) {
     Extract, analyze, and map this data into the EXACT JSON format below. 
     Calculate a realistic fair value using a simplified DCF. Invent reasonable peer comparison numbers based on the industry if missing.
     Generate a Nexus Score (0-100) based on overall health. Ensure the numbers match the schema exactly.
+    IMPORTANT: For all text fields inside "aiAnalysis" and "faqInsights", you MUST write detailed, comprehensive paragraphs (3-5 sentences each) in English. Do NOT output short fragments or "...".
     Do NOT include markdown formatting like \`\`\`json, just return the raw JSON string.
 
     Raw Data (truncated): ${JSON.stringify(rawData).substring(0, 15000)}
@@ -390,10 +391,10 @@ export async function generateResearchReport(ticker: string, userId: string) {
         "summary": "Foreign institutions are actively accumulating, creating strong price floors."
       },
       "aiAnalysis": {
-        "executiveSummary": "...",
-        "fundamentalDeepDive": "...",
-        "technicalOutlook": "...",
-        "riskFactors": ["Risk 1", "Risk 2"]
+        "executiveSummary": "[Write a detailed 3-4 sentence executive summary of the investment thesis based on the data]",
+        "fundamentalDeepDive": "[Write a detailed 3-4 sentence analysis of the company's financial health, valuation, and growth]",
+        "technicalOutlook": "[Write a detailed 3-4 sentence technical outlook based on price momentum and trading volume]",
+        "riskFactors": ["[Detailed risk factor 1]", "[Detailed risk factor 2]"]
       },
       "peers": [
         { "subject": "Value", "${ticker}": 67, "SectorAvg": 50, "fullMark": 100 },
@@ -414,11 +415,11 @@ export async function generateResearchReport(ticker: string, userId: string) {
         ]
       },
       "faqInsights": [
-        { "question": "What are the insiders doing with ${ticker}?", "iconName": "Briefcase", "title": "Insiders and institutional owners have recently made significant moves", "content": "..." },
-        { "question": "What should I know about ${ticker} market capitalization?", "iconName": "BarChart3", "title": "${ticker} is a top 30 market cap stock", "content": "..." },
-        { "question": "Does ${ticker} pay dividends?", "iconName": "Ticket", "title": "${ticker} is a dividend paying stock", "content": "..." },
-        { "question": "What about ${ticker}'s trading activity and liquidity?", "iconName": "Activity", "title": "${ticker} is heavily traded", "content": "..." },
-        { "question": "Would ${ticker} be good for ESG-conscious investors?", "iconName": "Leaf", "title": "${ticker} is a top ESG performer", "content": "..." }
+        { "question": "What are the insiders doing with ${ticker}?", "iconName": "Briefcase", "title": "Institutional Flow", "content": "[Write a detailed 2-3 sentence answer]" },
+        { "question": "What should I know about ${ticker} market capitalization?", "iconName": "BarChart3", "title": "Market Position", "content": "[Write a detailed 2-3 sentence answer]" },
+        { "question": "Does ${ticker} pay dividends?", "iconName": "Ticket", "title": "Dividend History", "content": "[Write a detailed 2-3 sentence answer]" },
+        { "question": "What about ${ticker}'s trading activity and liquidity?", "iconName": "Activity", "title": "Liquidity", "content": "[Write a detailed 2-3 sentence answer]" },
+        { "question": "Would ${ticker} be good for ESG-conscious investors?", "iconName": "Leaf", "title": "ESG Profile", "content": "[Write a detailed 2-3 sentence answer]" }
       ],
       "news": [
         { "id": 1, "date": "Sep 26, 2026", "headline": "Example News", "summary": "News summary", "sentiment": "Bullish", "tags": ["Analyst Ratings", "Bullish"] }
@@ -426,20 +427,19 @@ export async function generateResearchReport(ticker: string, userId: string) {
     }
   `;
 
-  // 3. Call Gemini
+  // 3. Call OpenRouter
   const response = await fetch(
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
+    "https://openrouter.ai/api/v1/chat/completions",
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-goog-api-key": apiKey,
+        "Authorization": `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: {
-          responseMimeType: "application/json",
-        }
+        model: "meta-llama/llama-3.3-70b-instruct",
+        messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" }
       }),
     }
   );
@@ -463,18 +463,26 @@ export async function generateResearchReport(ticker: string, userId: string) {
       });
       return dummy;
     }
-    throw new Error(`Gemini API Error: ${await response.text()}`);
+    throw new Error(`OpenRouter API Error: ${await response.text()}`);
   }
 
   const responseData = await response.json();
-  const textOutput = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
+  const textOutput = responseData.choices?.[0]?.message?.content;
   
   if (!textOutput) {
     throw new Error("Empty response from AI");
   }
 
   try {
-    const parsedData = JSON.parse(textOutput);
+    // Strip markdown formatting if the model wrapped the JSON
+    let cleanJson = textOutput.trim();
+    if (cleanJson.startsWith("```")) {
+      cleanJson = cleanJson.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "").trim();
+    }
+    
+    console.log("[OpenRouter Output]:", cleanJson.substring(0, 200) + "..."); // Log for debugging
+
+    const parsedData = JSON.parse(cleanJson);
 
     await saveResearchSnapshot({
       userId,
@@ -485,11 +493,7 @@ export async function generateResearchReport(ticker: string, userId: string) {
       rawDataSnapshot: rawData,
       fundamentalAnalysis: parsedData.valuation,
       technicalAnalysis: parsedData.bandarmologi,
-      finalSynthesis: {
-        intrinsic: parsedData.intrinsicValue,
-        quant: parsedData.quantModels,
-        aiAnalysis: parsedData.aiAnalysis,
-      },
+      finalSynthesis: parsedData,
       language: "en",
       status: "completed",
       tokensUsed: 1500,

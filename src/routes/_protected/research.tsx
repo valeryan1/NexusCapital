@@ -133,18 +133,41 @@ const loadSavedReportFn = createServerFn({ method: 'GET' })
 
     return {
       ...mockResearchData,
+      ...finalSynthesis,
       ticker: saved.ticker,
       companyName: saved.companyName,
       nexusScore:
         typeof saved.nexusScore === "number"
           ? saved.nexusScore
-          : mockResearchData.nexusScore,
+          : (finalSynthesis.nexusScore as number | undefined ?? mockResearchData.nexusScore),
       valuation: buildValuation(fundamental, finalSynthesis),
-      quantModels: (finalSynthesis).quant ?? mockResearchData.quantModels,
-      intrinsicValue: (finalSynthesis).intrinsic ?? mockResearchData.intrinsicValue,
-      aiAnalysis: (finalSynthesis).aiAnalysis ?? mockResearchData.aiAnalysis,
-      bandarmologi: technical ?? mockResearchData.bandarmologi,
+      quantModels: { ...mockResearchData.quantModels, ...(finalSynthesis.quantModels as Record<string, unknown> || finalSynthesis.quant as Record<string, unknown> || {}) },
+      intrinsicValue: { ...mockResearchData.intrinsicValue, ...(finalSynthesis.intrinsicValue as Record<string, unknown> || finalSynthesis.intrinsic as Record<string, unknown> || {}) },
+      aiAnalysis: { ...mockResearchData.aiAnalysis, ...(finalSynthesis.aiAnalysis as Record<string, unknown> || {}) },
+      bandarmologi: technical ?? (finalSynthesis.bandarmologi as typeof mockResearchData.bandarmologi) ?? mockResearchData.bandarmologi,
     };
+  });
+
+const fetchRecentSearchesFn = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const [{ getSession }, { getResearchHistory }] = await Promise.all([
+      import("@/lib/session.server"),
+      import("@/services/research.service.server"),
+    ]);
+    const session = await getSession(getRequestHeaders() as unknown as Headers);
+    if (!session) return { recents: [] };
+    
+    const projects = await getResearchHistory(session.user.id);
+    const seen = new Set<string>();
+    const recents = projects
+      .filter((project) => {
+        if (seen.has(project.ticker)) return false;
+        seen.add(project.ticker);
+        return true;
+      })
+      .map(({ id, ticker, companyName, createdAt, nexusScore }) => ({ id, ticker, companyName, createdAt, nexusScore }));
+      
+    return { recents };
   });
 
 export const Route = createFileRoute("/_protected/research")({
@@ -156,6 +179,7 @@ export const Route = createFileRoute("/_protected/research")({
       fromHistory: search.fromHistory === true || search.fromHistory === 'true',
     };
   },
+  loader: async () => await fetchRecentSearchesFn(),
   component: ResearchStudio,
 });
 
@@ -521,8 +545,8 @@ const AI_SECTIONS = [
     color: "text-brand-500",
     activeColor: "border-brand-500",
     bgActive: "bg-brand-500/10",
-    getContent: (a: AiAnalysis) => a.executiveSummary,
-    getSnippet: (a: AiAnalysis) => a.executiveSummary.substring(0, 60) + "...",
+    getContent: (a: AiAnalysis) => a.executiveSummary || "",
+    getSnippet: (a: AiAnalysis) => (a.executiveSummary || "").substring(0, 60) + "...",
   },
   {
     id: "fundamentals",
@@ -531,8 +555,8 @@ const AI_SECTIONS = [
     color: "text-blue-400",
     activeColor: "border-blue-400",
     bgActive: "bg-blue-400/5",
-    getContent: (a: AiAnalysis) => a.fundamentalDeepDive,
-    getSnippet: (a: AiAnalysis) => a.fundamentalDeepDive.substring(0, 60) + "...",
+    getContent: (a: AiAnalysis) => a.fundamentalDeepDive || "",
+    getSnippet: (a: AiAnalysis) => (a.fundamentalDeepDive || "").substring(0, 60) + "...",
   },
   {
     id: "technical",
@@ -541,8 +565,8 @@ const AI_SECTIONS = [
     color: "text-purple-400",
     activeColor: "border-purple-400",
     bgActive: "bg-purple-400/5",
-    getContent: (a: AiAnalysis) => a.technicalOutlook,
-    getSnippet: (a: AiAnalysis) => a.technicalOutlook.substring(0, 60) + "...",
+    getContent: (a: AiAnalysis) => a.technicalOutlook || "",
+    getSnippet: (a: AiAnalysis) => (a.technicalOutlook || "").substring(0, 60) + "...",
   },
   {
     id: "risks",
@@ -551,8 +575,11 @@ const AI_SECTIONS = [
     color: "text-semantic-bear",
     activeColor: "border-semantic-bear",
     bgActive: "bg-semantic-bear/5",
-    getContent: (a: AiAnalysis) => a.riskFactors.join(" • "),
-    getSnippet: (a: AiAnalysis) => (a.riskFactors[0] || "").substring(0, 60) + "...",
+    getContent: (a: AiAnalysis) => Array.isArray(a.riskFactors) ? a.riskFactors.join(" • ") : String(a.riskFactors || ""),
+    getSnippet: (a: AiAnalysis) => {
+      const firstRisk = Array.isArray(a.riskFactors) ? a.riskFactors[0] : String(a.riskFactors || "");
+      return (firstRisk || "").substring(0, 60) + "...";
+    },
   },
 ];
 
@@ -620,7 +647,7 @@ function AiSynthesisPanel({ aiAnalysis, ticker }: { aiAnalysis: AiAnalysis; tick
 
             {activeId === "risks" ? (
               <ul className="space-y-3">
-                {aiAnalysis.riskFactors.map((risk, i) => (
+                {(Array.isArray(aiAnalysis.riskFactors) ? aiAnalysis.riskFactors : [String(aiAnalysis.riskFactors || "")]).map((risk, i) => (
                   <li key={i} className="flex items-start gap-3">
                     <span className="text-semantic-bear mt-1.5 text-xs">•</span>
                     <p className="text-[15px] text-white light:text-gray-800 leading-relaxed font-light">{risk}</p>
@@ -639,18 +666,53 @@ function AiSynthesisPanel({ aiAnalysis, ticker }: { aiAnalysis: AiAnalysis; tick
   );
 }
 
+function formatRelativeTime(dateString: string | Date | null) {
+  if (!dateString) return null;
+  const d = new Date(dateString);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - d.getTime()) / 1000);
+  
+  let relative = "Just now";
+  if (diffInSeconds >= 60) {
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) {
+      relative = `${diffInMinutes} min`;
+    } else {
+      const diffInHours = Math.floor(diffInMinutes / 60);
+      if (diffInHours < 24) {
+        relative = `${diffInHours} hour${diffInHours > 1 ? 's' : ''}`;
+      } else {
+        const diffInDays = Math.floor(diffInHours / 24);
+        relative = `${diffInDays} day${diffInDays > 1 ? 's' : ''}`;
+      }
+    }
+  }
+
+  const day = d.getDate().toString().padStart(2, '0');
+  const month = (d.getMonth() + 1).toString().padStart(2, '0');
+  const year = d.getFullYear();
+  const absolute = `${day}-${month}-${year}`;
+
+  return { relative, absolute };
+}
 
 // ==========================================
 // MAIN COMPONENT
 // ==========================================
 function ResearchStudio() {
   const search = Route.useSearch();
-  const [tickerInput, setTickerInput] = useState(search.q || "BBCA");
-  const [data, setData] = useState<typeof mockResearchData>(mockResearchData); 
+  const { recents } = Route.useLoaderData();
+  const [tickerInput, setTickerInput] = useState(search.q || "");
+  const [data, setData] = useState<typeof mockResearchData | null>(null); 
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const [recentPage, setRecentPage] = useState(1);
+  const recentsPerPage = 8;
+  
+  const totalRecentPages = Math.ceil((recents?.length || 0) / recentsPerPage);
+  const paginatedRecents = (recents || []).slice((recentPage - 1) * recentsPerPage, recentPage * recentsPerPage);
 
   const handleGenerate = useCallback(async (targetTicker?: string) => {
     const t = typeof targetTicker === 'string' ? targetTicker : tickerInput;
@@ -733,7 +795,7 @@ function ResearchStudio() {
   }, [search.auto, search.fromHistory, search.q]);
 
   // Feature 3: Process institutional flows for the chart
-  const maxAbsFlow = Math.max(...data.institutionalFlows.map(f => Math.abs(f.change)));
+  const maxAbsFlow = data ? Math.max(...data.institutionalFlows.map(f => Math.abs(f.change))) : 0;
 
   return (
     <div className="view-section animate-fade-in max-w-7xl mx-auto space-y-6 pb-12 relative print:bg-black print:text-white print:m-0 print:p-0">
@@ -793,33 +855,41 @@ function ResearchStudio() {
       )}
 
       {/* HEADER */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-dark-800 pb-4 no-print">
-        <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <BarChart2 className="size-6 text-brand-500" />
-            Research Studio
-          </h1>
-          <p className="text-gray-400 text-sm mt-1">Analisis ekuitas tingkat lanjut, model kuantitatif, dan pelacakan aliran dana asing.</p>
-        </div>
-        <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
-          <div className="relative w-full md:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-500" />
-            <input 
-              type="text" 
-              value={tickerInput}
-              onChange={(e) => setTickerInput(e.target.value.toUpperCase())}
-              placeholder="Search Ticker..." 
-              className="w-full bg-dark-950 border border-dark-700 rounded-lg pl-9 pr-4 py-2 text-white placeholder-gray-600 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 uppercase font-bold" 
-            />
+      {data && (
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-dark-800 pb-4 no-print">
+          <div>
+            <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+              <BarChart2 className="size-6 text-brand-500" />
+              Research Studio
+            </h1>
+            <p className="text-gray-400 text-sm mt-1">Analisis ekuitas tingkat lanjut, model kuantitatif, dan pelacakan aliran dana asing.</p>
           </div>
-          <button 
-            onClick={() => window.print()} 
-            className="flex items-center justify-center gap-2 bg-dark-800 hover:bg-dark-700 text-white font-bold py-2 px-4 rounded-lg border border-dark-600 transition-colors shrink-0"
-          >
-            <Download className="size-4" /> Export PDF
-          </button>
+          <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+            <div className="relative w-full md:w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-500" />
+              <input 
+                type="text" 
+                value={tickerInput}
+                onChange={(e) => setTickerInput(e.target.value.toUpperCase())}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    void handleGenerate();
+                  }
+                }}
+                placeholder="Search Ticker..." 
+                className="w-full bg-dark-950 border border-dark-700 rounded-lg pl-9 pr-4 py-2 text-white placeholder-gray-600 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 uppercase font-bold" 
+              />
+            </div>
+            <button 
+              onClick={() => window.print()} 
+              className="flex items-center justify-center gap-2 bg-dark-800 hover:bg-dark-700 text-white font-bold py-2 px-4 rounded-lg border border-dark-600 transition-colors shrink-0"
+            >
+              <Download className="size-4" /> Export PDF
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ERROR MESSAGE */}
       {errorMsg && (
@@ -833,7 +903,98 @@ function ResearchStudio() {
       )}
 
       {/* TICKER OVERVIEW BAR */}
-      <div className="bg-dark-900 border border-dark-800 rounded-xl p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-lg shadow-black/20 print-break-inside-avoid">
+      {!data ? (
+        <div className="flex flex-col items-center justify-center py-20 px-4 text-center animate-in fade-in zoom-in-95 duration-500 no-print">
+          <div className="w-full max-w-2xl space-y-8">
+            <div className="space-y-4">
+              <div className="inline-flex items-center justify-center p-4 bg-brand-500/10 rounded-full mb-2 border border-brand-500/20">
+                <Sparkles className="size-8 text-brand-500" />
+              </div>
+              <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight">Nexus <span className="text-brand-500">Research</span></h2>
+              <p className="text-gray-400 text-lg">Search for any ticker to generate a comprehensive AI-driven equity research report instantly.</p>
+            </div>
+            
+            <div className="relative">
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 size-5 text-gray-400" />
+              <input 
+                type="text" 
+                value={tickerInput}
+                onChange={(e) => setTickerInput(e.target.value.toUpperCase())}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    void handleGenerate();
+                  }
+                }}
+                placeholder="SEARCH TICKER... (E.G. BBCA)" 
+                className="w-full bg-dark-900/50 border border-dark-700 rounded-2xl pl-14 pr-16 py-5 text-xl text-white placeholder-gray-600 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 shadow-2xl shadow-brand-500/5 uppercase font-bold" 
+              />
+              <button 
+                onClick={() => void handleGenerate()}
+                disabled={isLoading || !tickerInput.trim()}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-3 bg-brand-500 hover:bg-brand-400 text-white rounded-xl transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100 shadow-[0_0_20px_rgba(255,122,0,0.3)]"
+              >
+                {isLoading ? <Loader2 className="size-5 animate-spin" /> : <Sparkles className="size-5" />}
+              </button>
+            </div>
+
+            {recents && recents.length > 0 && (
+              <div className="pt-8 text-left border-t border-dark-800/50">
+                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <BarChart2 className="size-4" />
+                  Recent Research
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                  {paginatedRecents.map((recent: { id: string; ticker: string; companyName: string; createdAt: string | Date | null }) => {
+                    const time = formatRelativeTime(recent.createdAt);
+                    return (
+                      <button
+                        key={recent.id}
+                        onClick={() => void loadSavedReport(recent.ticker)}
+                        className="flex flex-col items-start p-4 bg-dark-900 border border-dark-800 hover:border-brand-500/50 hover:bg-dark-800 rounded-xl transition-all group text-left shadow-lg shadow-black/10"
+                      >
+                        <div className="w-full flex items-start justify-between gap-2">
+                          <span className="text-xl font-black text-white group-hover:text-brand-500 transition-colors leading-none">{recent.ticker}</span>
+                          {time && (
+                            <span className="text-[10px] font-medium text-gray-400 bg-dark-950 px-2 py-1 rounded border border-dark-800 whitespace-nowrap shrink-0">{time.relative}</span>
+                          )}
+                        </div>
+                        <span className="text-[10px] text-gray-500 font-medium truncate w-full mt-3 uppercase tracking-wider">{recent.companyName}</span>
+                        {time && (
+                          <span className="text-[10px] text-gray-600 font-bold mt-1">{time.absolute}</span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                {totalRecentPages > 1 && (
+                  <div className="flex items-center justify-center gap-1 mt-6">
+                    {Array.from({ length: totalRecentPages }).map((_, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setRecentPage(idx + 1)}
+                        className={`w-8 h-8 rounded-full text-xs font-bold transition-all ${recentPage === idx + 1 ? 'bg-brand-500 text-white shadow-[0_0_10px_rgba(255,122,0,0.4)]' : 'bg-dark-900 text-gray-500 border border-dark-800 hover:text-white hover:border-gray-600'}`}
+                      >
+                        {idx + 1}
+                      </button>
+                    ))}
+                    {recentPage < totalRecentPages && (
+                      <button
+                        onClick={() => setRecentPage(p => p + 1)}
+                        className="flex items-center gap-1 px-3 h-8 rounded-full bg-dark-900 text-gray-400 border border-dark-800 text-xs font-bold hover:text-white hover:border-gray-600 transition-all ml-2"
+                      >
+                        Next <ChevronRight className="size-3" />
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="bg-dark-900 border border-dark-800 rounded-xl p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-lg shadow-black/20 print-break-inside-avoid">
         <div>
           <div className="flex items-center gap-3">
             <h2 className="text-3xl font-black text-white tracking-tight">{data.ticker}</h2>
@@ -892,20 +1053,20 @@ function ResearchStudio() {
                 Intrinsic Value (Fair Price)
               </h3>
               <div className="flex items-end gap-3 mb-2">
-                <div className="text-3xl font-black text-white">Rp {data.intrinsicValue.fairValue.toLocaleString('id-ID')}</div>
+                <div className="text-3xl font-black text-white">Rp {data.intrinsicValue?.fairValue?.toLocaleString('id-ID') ?? '-'}</div>
                 <div className="text-sm font-bold text-semantic-bull mb-1 bg-semantic-bull/10 px-2 py-0.5 rounded border border-semantic-bull/20">
-                  {data.intrinsicValue.marginOfSafety}% Discount
+                  {data.intrinsicValue?.marginOfSafety ?? '-'}% Discount
                 </div>
               </div>
               <div className="w-full bg-dark-800 rounded-full h-2 mt-4 mb-2">
-                <div className="bg-brand-500 h-2 rounded-full" style={{ width: `${(data.currentPrice / data.intrinsicValue.fairValue) * 100}%` }}></div>
+                <div className="bg-brand-500 h-2 rounded-full" style={{ width: `${(data.currentPrice / (data.intrinsicValue?.fairValue || 1)) * 100}%` }}></div>
               </div>
               <div className="flex justify-between text-xs font-medium">
                 <span className="text-gray-400">Current: {data.currentPrice.toLocaleString('id-ID')}</span>
-                <span className="text-brand-500">Fair: {data.intrinsicValue.fairValue.toLocaleString('id-ID')}</span>
+                <span className="text-brand-500">Fair: {data.intrinsicValue?.fairValue?.toLocaleString('id-ID') ?? '-'}</span>
               </div>
               <p className="text-[10px] text-gray-500 mt-4 border-t border-dark-800 pt-3">
-                Model: {data.intrinsicValue.model}
+                Model: {data.intrinsicValue?.model ?? '-'}
               </p>
             </div>
 
@@ -922,8 +1083,8 @@ function ResearchStudio() {
                     <div className="text-[10px] text-white light:text-gray-700">Financial Trend Strength</div>
                   </div>
                   <div className="text-right">
-                    <div className="text-xl font-black text-semantic-bull">{data.quantModels.piotroski.score}<span className="text-sm text-white light:text-gray-700">/9</span></div>
-                    <div className="text-[10px] font-bold text-semantic-bull uppercase">{data.quantModels.piotroski.interpretation}</div>
+                    <div className="text-xl font-black text-semantic-bull">{data.quantModels?.piotroski?.score ?? '-'}<span className="text-sm text-white light:text-gray-700">/9</span></div>
+                    <div className="text-[10px] font-bold text-semantic-bull uppercase">{data.quantModels?.piotroski?.interpretation ?? '-'}</div>
                   </div>
                 </div>
                 <div className="flex justify-between items-center bg-dark-950 p-3 rounded-lg border border-dark-800">
@@ -932,8 +1093,8 @@ function ResearchStudio() {
                     <div className="text-[10px] text-white light:text-gray-700">Bankruptcy Probability</div>
                   </div>
                   <div className="text-right">
-                    <div className="text-xl font-black text-semantic-bull">{data.quantModels.altman.score}</div>
-                    <div className="text-[10px] font-bold text-semantic-bull uppercase">{data.quantModels.altman.interpretation}</div>
+                    <div className="text-xl font-black text-semantic-bull">{data.quantModels?.altman?.score ?? '-'}</div>
+                    <div className="text-[10px] font-bold text-semantic-bull uppercase">{data.quantModels?.altman?.interpretation ?? '-'}</div>
                   </div>
                 </div>
               </div>
@@ -974,9 +1135,9 @@ function ResearchStudio() {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
-                { label: 'DCF Value', value: data.intrinsicValue.dcf, desc: 'Discounted Cash Flow' },
-                { label: 'DDM Value', value: data.intrinsicValue.ddm, desc: 'Dividend Discount Model' },
-                { label: 'Relative Value', value: data.intrinsicValue.relative, desc: 'Peer Comparison' },
+                { label: 'DCF Value', value: data.intrinsicValue?.dcf ?? 0, desc: 'Discounted Cash Flow' },
+                { label: 'DDM Value', value: data.intrinsicValue?.ddm ?? 0, desc: 'Dividend Discount Model' },
+                { label: 'Relative Value', value: data.intrinsicValue?.relative ?? 0, desc: 'Peer Comparison' },
               ].map((item) => {
                 const upside = ((item.value - data.currentPrice) / data.currentPrice * 100);
                 return (
@@ -1357,6 +1518,8 @@ function ResearchStudio() {
 
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 }
