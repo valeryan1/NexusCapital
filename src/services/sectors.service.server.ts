@@ -1,11 +1,13 @@
 export async function getCompanyReport(ticker: string) {
-  const apiKey = process.env.SECTORS_API_KEY;
+  let apiKey = process.env.SECTORS_API_KEY;
+  if (apiKey) apiKey = apiKey.replace(/^"|'|"$|'$/g, '').trim();
+  console.log("Checking API key in getCompanyReport:", apiKey ? "EXISTS" : "MISSING");
   if (!apiKey) {
     throw new Error("SECTORS_API_KEY is not configured.");
   }
 
   const response = await fetch(
-    `https://api.sectors.app/v2/company/report/${ticker}/`,
+    `https://api.sectors.app/v2/company/report/${ticker}/?sections=overview,valuation,financials,peers,ownership,dividend`,
     {
       headers: {
         Authorization: apiKey,
@@ -16,14 +18,15 @@ export async function getCompanyReport(ticker: string) {
   if (!response.ok) {
     const errText = await response.text();
     console.error(`Sectors API Error for ${ticker}:`, errText);
-    throw new Error(`Failed to fetch report for ${ticker}`);
+    throw new Error(`Status ${response.status}: ${errText}`);
   }
 
   return await response.json();
 }
 
 export async function getTrendingStocks() {
-  const apiKey = process.env.SECTORS_API_KEY;
+  let apiKey = process.env.SECTORS_API_KEY;
+  if (apiKey) apiKey = apiKey.replace(/^"|'|"$|'$/g, '').trim();
   if (!apiKey) return [];
   
   const symbols = ["BBCA", "BMRI", "AMMN", "BREN", "GOTO"];

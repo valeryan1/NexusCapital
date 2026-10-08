@@ -272,9 +272,8 @@ export async function getResearchHistory(userId: string) {
 }
 
 export async function generateResearchReport(ticker: string, userId: string) {
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  const useDummyResearch =
-    process.env.NODE_ENV === "test" || process.env.USE_DUMMY_RESEARCH === "true";
+  const apiKey = process.env.GEMINI_API_KEY;
+  const useDummyResearch = false; // Forced false so it NEVER uses dummy data
 
   if (useDummyResearch) {
     const dummy = buildDummyResearchReport(ticker);
@@ -296,15 +295,16 @@ export async function generateResearchReport(ticker: string, userId: string) {
   }
 
   if (!apiKey) {
-    throw new Error("OPENROUTER_API_KEY is not configured.");
+    throw new Error("GEMINI_API_KEY is not configured.");
   }
 
   // 1. Get raw data from Sectors API
   let rawData;
   try {
     rawData = await getCompanyReport(ticker);
-  } catch {
-    throw new Error(`Gagal mengambil data dari bursa untuk ticker ${ticker}. Pastikan ticker benar.`);
+  } catch (err) {
+    console.error("DEBUG - Original Error:", err);
+    throw new Error(`Gagal mengambil data dari bursa untuk ticker ${ticker}. Detail: ${err instanceof Error ? err.message : String(err)}`);
   }
 
   // 2. Prepare Prompt
@@ -427,19 +427,19 @@ export async function generateResearchReport(ticker: string, userId: string) {
     }
   `;
 
-  // 3. Call OpenRouter
+  // 3. Call Gemini
   const response = await fetch(
-    "https://openrouter.ai/api/v1/chat/completions",
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "meta-llama/llama-3.3-70b-instruct",
-        messages: [{ role: "user", content: prompt }],
-        response_format: { type: "json_object" }
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          responseMimeType: "application/json"
+        }
       }),
     }
   );
@@ -463,11 +463,11 @@ export async function generateResearchReport(ticker: string, userId: string) {
       });
       return dummy;
     }
-    throw new Error(`OpenRouter API Error: ${await response.text()}`);
+    throw new Error(`Gemini API Error: ${await response.text()}`);
   }
 
   const responseData = await response.json();
-  const textOutput = responseData.choices?.[0]?.message?.content;
+  const textOutput = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
   
   if (!textOutput) {
     throw new Error("Empty response from AI");

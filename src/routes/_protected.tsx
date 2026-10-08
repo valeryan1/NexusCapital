@@ -18,7 +18,6 @@ import {
   Sparkles,
   Activity,
   Star,
-  FolderOpen,
 } from "lucide-react";
 import { cn } from "cn";
 import { Brand } from "@/components/brand";
@@ -35,7 +34,6 @@ const navItemsWorkspace = [
   { id: "assistant", label: "Nexus Assistant", icon: Sparkles, path: "/assistant" },
   { id: "overview", label: "Overview", icon: PieChart, path: "/app" },
   { id: "research", label: "Research Studio", icon: Bot, path: "/research" },
-  { id: "projects", label: "Project Saya", icon: FolderOpen, path: "/projects" },
   { id: "valuation", label: "Valuation Screener", icon: Calculator, path: "/valuation" },
   { id: "ipo", label: "IPO", icon: Landmark, path: "/ipo" },
   { id: "sectors", label: "Sectors Dashboard", icon: Activity, path: "/sectors/banks" },

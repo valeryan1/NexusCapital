@@ -14,6 +14,7 @@ import {
   Settings2
 } from "lucide-react";
 import { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_protected/alerts")({
@@ -21,8 +22,17 @@ export const Route = createFileRoute("/_protected/alerts")({
   component: AlertsPage,
 });
 
+type Rule = {
+  id: number;
+  name: string;
+  ticker: string;
+  condition: string;
+  type: string;
+  status: string;
+};
+
 // Mock Data for Rules
-const mockRules = [
+const initialRules: Rule[] = [
   { id: 1, name: "Big Bank Distribution", ticker: "BBCA, BMRI", condition: "Price Drop > 3% AND Foreign Net Sell > 150B", type: "Price & Flow", status: "Active" },
   { id: 2, name: "Tech Sentiment Shock", ticker: "GOTO, BUKA", condition: "AI Sentiment == 'Bearish Shock' AND Vol > 200% MA20", type: "AI Sentiment", status: "Active" },
   { id: 3, name: "Energy Breakout", ticker: "ADRO, PGAS", condition: "Price Up > 5% AND Accumulation == 'Massive'", type: "Momentum", status: "Paused" },
@@ -38,6 +48,39 @@ const mockPulseFeed = [
 
 function AlertsPage() {
   const [selectedAlert, setSelectedAlert] = useState<typeof mockPulseFeed[0] | null>(null);
+  const [rules, setRules] = useState<Rule[]>(initialRules);
+  const [isRuleModalOpen, setIsRuleModalOpen] = useState(false);
+  const [newRuleName, setNewRuleName] = useState('');
+  const [newRuleTicker, setNewRuleTicker] = useState('');
+  const [newRuleCondition, setNewRuleCondition] = useState('');
+
+  const toggleRuleStatus = (id: number) => {
+    setRules(rules.map(rule => 
+      rule.id === id 
+        ? { ...rule, status: rule.status === 'Active' ? 'Paused' : 'Active' } 
+        : rule
+    ));
+  };
+
+  const handleCreateRule = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newRuleName || !newRuleTicker || !newRuleCondition) return;
+    
+    const newRule: Rule = {
+      id: Date.now(),
+      name: newRuleName,
+      ticker: newRuleTicker,
+      condition: newRuleCondition,
+      type: "Custom",
+      status: "Active"
+    };
+    
+    setRules([newRule, ...rules]);
+    setIsRuleModalOpen(false);
+    setNewRuleName('');
+    setNewRuleTicker('');
+    setNewRuleCondition('');
+  };
 
   return (
     <div className="view-section animate-fade-in max-w-[1400px] mx-auto space-y-6 pb-12 relative overflow-hidden">
@@ -51,7 +94,10 @@ function AlertsPage() {
           </h1>
           <p className="text-gray-400 text-sm mt-1">Multi-variable triggers, AI sentiment detection, and live market pulse.</p>
         </div>
-        <button className="bg-brand-500 hover:bg-brand-400 text-white font-bold px-4 py-2 rounded-lg transition-colors text-sm flex items-center gap-2 shadow-[0_0_15px_rgba(255,122,0,0.3)]">
+        <button 
+          onClick={() => setIsRuleModalOpen(true)}
+          className="bg-brand-500 hover:bg-brand-400 text-white font-bold px-4 py-2 rounded-lg transition-colors text-sm flex items-center gap-2 shadow-[0_0_15px_rgba(255,122,0,0.3)]"
+        >
           <Plus className="size-4" /> Create Complex Rule
         </button>
       </div>
@@ -78,8 +124,16 @@ function AlertsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-dark-800">
-                  {mockRules.map((rule) => (
-                    <tr key={rule.id} className="hover:bg-dark-800/30 transition-colors group">
+                  <AnimatePresence>
+                  {rules.map((rule) => (
+                    <motion.tr 
+                      key={rule.id}
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      className="hover:bg-dark-800/30 transition-colors group"
+                    >
                       <td className="px-5 py-4">
                         <div className="font-bold text-gray-200 group-hover:text-white">{rule.name}</div>
                         <div className="text-[10px] text-brand-500 font-mono mt-1">{rule.ticker}</div>
@@ -100,20 +154,21 @@ function AlertsPage() {
                       <td className="px-5 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           {rule.status === "Active" ? (
-                            <div className="flex items-center gap-1.5 px-2 py-1 bg-semantic-bull/10 text-semantic-bull border border-semantic-bull/20 rounded text-xs font-bold uppercase">
+                            <button onClick={() => toggleRuleStatus(rule.id)} className="flex items-center gap-1.5 px-2 py-1 bg-semantic-bull/10 text-semantic-bull hover:bg-semantic-bull/20 border border-semantic-bull/20 rounded text-xs font-bold uppercase transition-colors cursor-pointer">
                               <span className="w-1.5 h-1.5 rounded-full bg-semantic-bull animate-pulse"></span>
                               Active
-                            </div>
+                            </button>
                           ) : (
-                            <div className="px-2 py-1 bg-dark-800 text-gray-500 border border-dark-700 rounded text-xs font-bold uppercase">
+                            <button onClick={() => toggleRuleStatus(rule.id)} className="px-2 py-1 bg-dark-800 text-gray-500 hover:text-white border border-dark-700 hover:border-dark-500 rounded text-xs font-bold uppercase transition-colors cursor-pointer">
                               Paused
-                            </div>
+                            </button>
                           )}
-                          <button className="p-1 hover:text-white text-gray-500"><MoreHorizontal className="size-4" /></button>
+                          
                         </div>
                       </td>
-                    </tr>
+                    </motion.tr>
                   ))}
+                  </AnimatePresence>
                 </tbody>
               </table>
             </div>
@@ -250,6 +305,66 @@ function AlertsPage() {
         </div>
       )}
 
+      {/* CREATE RULE MODAL */}
+      <AnimatePresence>
+      {isRuleModalOpen && (
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+        >
+          <motion.div 
+            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+            className="bg-dark-900 border border-dark-800 rounded-xl w-full max-w-md shadow-2xl"
+          >
+            <div className="p-4 border-b border-dark-800 flex justify-between items-center bg-dark-950 rounded-t-xl">
+              <h2 className="text-lg font-bold text-white">Create Complex Rule</h2>
+              <button onClick={() => setIsRuleModalOpen(false)} className="text-gray-400 hover:text-white transition-colors">
+                <X className="size-5" />
+              </button>
+            </div>
+            <form onSubmit={handleCreateRule} className="p-5 space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Rule Name</label>
+                <input 
+                  type="text" 
+                  value={newRuleName}
+                  onChange={e => setNewRuleName(e.target.value)}
+                  placeholder="e.g. Unusual Volume"
+                  className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-brand-500 transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Target Tickers</label>
+                <input 
+                  type="text" 
+                  value={newRuleTicker}
+                  onChange={e => setNewRuleTicker(e.target.value)}
+                  placeholder="e.g. BBCA, BBRI"
+                  className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-brand-500 transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Logic Condition</label>
+                <textarea 
+                  value={newRuleCondition}
+                  onChange={e => setNewRuleCondition(e.target.value)}
+                  placeholder="e.g. Volume > 200% AND Price Drop > 5%"
+                  className="w-full bg-dark-950 border border-dark-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-brand-500 transition-colors h-24 resize-none font-mono text-sm"
+                />
+              </div>
+              <div className="pt-4 flex justify-end gap-3">
+                <button type="button" onClick={() => setIsRuleModalOpen(false)} className="px-4 py-2 text-sm font-bold text-gray-400 hover:text-white transition-colors">Cancel</button>
+                <button type="submit" className="bg-brand-500 hover:bg-brand-400 text-white font-bold px-4 py-2 rounded-lg transition-colors text-sm">Save Rule</button>
+              </div>
+            </form>
+          </motion.div>
+        </motion.div>
+      )}
+      </AnimatePresence>
     </div>
   );
 }

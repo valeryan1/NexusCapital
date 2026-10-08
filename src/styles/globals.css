@@ -44,9 +44,13 @@
   --color-semantic-info: #3B82F6;
   
   --color-white: var(--ds-white);
+  --color-gray-100: var(--ds-gray-100);
+  --color-gray-200: var(--ds-gray-200);
   --color-gray-300: var(--ds-gray-300);
   --color-gray-400: var(--ds-gray-400);
   --color-gray-500: var(--ds-gray-500);
+  --color-gray-600: var(--ds-gray-600);
+  --color-brand-300: #FFBF80;
 
   /* Custom animations */
   --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
@@ -86,9 +90,12 @@
   --ds-dark-800: #27272A;
   --ds-dark-700: #3F3F46;
   --ds-white: #FFFFFF;
+  --ds-gray-100: #F3F4F6;
+  --ds-gray-200: #E5E7EB;
   --ds-gray-300: #D1D5DB;
   --ds-gray-400: #9CA3AF;
   --ds-gray-500: #6B7280;
+  --ds-gray-600: #4B5563;
   
   --glass-bg: rgba(24, 24, 27, 0.7);
   --glass-border: rgba(63, 63, 70, 0.5);
@@ -115,9 +122,12 @@
   --ds-dark-800: #E4E4E7; /* Borders/Hover */
   --ds-dark-700: #D4D4D8; /* Deeper Borders */
   --ds-white: #000000;    /* Pure black for maximum clarity on titles */
+  --ds-gray-100: #09090B; /* Near black (bubbles / strong text) */
+  --ds-gray-200: #111827; /* Very dark gray */
   --ds-gray-300: #1F2937; /* Very dark gray for readability */
   --ds-gray-400: #374151; /* Dark gray for subtitles */
   --ds-gray-500: #4B5563; /* Medium gray */
+  --ds-gray-600: #6B7280; /* Muted gray, still readable on light bg */
   
   --glass-bg: rgba(255, 255, 255, 0.85);
   --glass-border: rgba(228, 228, 231, 0.6);
@@ -183,4 +193,13 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
   }
+}
+
+/* Light mode: `text-white` is inverted to black, so keep it white on brand-colored fills. */
+.light .bg-brand-500.text-white,
+.light .bg-brand-500 .text-white,
+.light .from-brand-500.text-white,
+.light .bg-semantic-bear.text-white,
+.light .bg-semantic-bull.text-white {
+  color: #FFFFFF;
 }

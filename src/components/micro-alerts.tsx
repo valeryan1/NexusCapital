@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Zap, X } from 'lucide-react';
+import { Zap, X, Plus, Filter } from 'lucide-react';
 
 interface NewsItem {
   id: string;
@@ -95,9 +95,18 @@ const Toast: React.FC<ToastProps> = ({ news, onDismiss }) => {
   );
 };
 
+interface ComplexRule {
+  id: string;
+  ticker: string;
+  keyword: string;
+}
+
 // --- Main System Component ---
 export const MicroAlertsSystem: React.FC = () => {
-  const [watchlist] = useState<string[]>(['BBCA', 'ADRO', 'BRMS']);
+  const [rules, setRules] = useState<ComplexRule[]>([]);
+  const [showRuleForm, setShowRuleForm] = useState(false);
+  const [newRuleTicker, setNewRuleTicker] = useState('');
+  const [newRuleKeyword, setNewRuleKeyword] = useState('');
   const [activeAlerts, setActiveAlerts] = useState<NewsItem[]>([]);
 
   // Simulation Logic: Emit news every 3 seconds
@@ -111,8 +120,14 @@ export const MicroAlertsSystem: React.FC = () => {
       
       const incomingNews = MOCK_NEWS_STREAM[currentIndex];
       
-      // CORE LOGIC: Only trigger if ticker is in watchlist
-      if (watchlist.includes(incomingNews.ticker)) {
+      // CORE LOGIC: Evaluate complex rules
+      const matchesRule = rules.length === 0 ? false : rules.some(rule => {
+        const matchTicker = rule.ticker === '*' || incomingNews.ticker.toLowerCase() === rule.ticker.toLowerCase();
+        const matchKeyword = rule.keyword === '' || incomingNews.headline.toLowerCase().includes(rule.keyword.toLowerCase());
+        return matchTicker && matchKeyword;
+      });
+
+      if (matchesRule) {
         // Add a unique timestamp ID to allow duplicate news from loop
         const newAlert = { ...incomingNews, id: incomingNews.id + '-' + Date.now() };
         setActiveAlerts(prev => [...prev, newAlert]);
@@ -122,11 +137,19 @@ export const MicroAlertsSystem: React.FC = () => {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [watchlist]);
+  }, [rules]);
 
   const removeAlert = useCallback((id: string) => {
     setActiveAlerts(prev => prev.filter(alert => alert.id !== id));
   }, []);
+
+  const handleAddRule = () => {
+    if (!newRuleTicker && !newRuleKeyword) return;
+    setRules(prev => [...prev, { id: Date.now().toString(), ticker: newRuleTicker || '*', keyword: newRuleKeyword }]);
+    setNewRuleTicker('');
+    setNewRuleKeyword('');
+    setShowRuleForm(false);
+  };
 
   return (
     <>
@@ -137,6 +160,54 @@ export const MicroAlertsSystem: React.FC = () => {
           to { transform: scaleX(0); }
         }
       `}</style>
+
+      {/* Rules UI */}
+      <div className="fixed top-4 right-4 z-50 p-4 bg-[#0f1219]/90 border border-slate-700 rounded-xl shadow-xl max-w-sm w-full text-slate-200 pointer-events-auto font-sans">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="font-semibold flex items-center gap-2"><Filter size={16}/> Complex Rules</h3>
+          <button onClick={() => setShowRuleForm(!showRuleForm)} className="p-1 hover:bg-slate-800 rounded">
+            <Plus size={16} />
+          </button>
+        </div>
+        
+        {showRuleForm && (
+          <div className="mb-4 flex flex-col gap-2 p-3 bg-slate-800/50 rounded-lg">
+            <input 
+              placeholder="Ticker (e.g. BBCA, or * for all)" 
+              value={newRuleTicker} 
+              onChange={e => setNewRuleTicker(e.target.value)}
+              className="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500"
+            />
+            <input 
+              placeholder="Keyword in headline" 
+              value={newRuleKeyword} 
+              onChange={e => setNewRuleKeyword(e.target.value)}
+              className="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500"
+            />
+            <button onClick={handleAddRule} className="bg-blue-600 hover:bg-blue-700 text-white text-sm py-1 rounded transition-colors">
+              Add Rule
+            </button>
+          </div>
+        )}
+
+        <div className="flex flex-col gap-2 max-h-40 overflow-y-auto">
+          {rules.length === 0 && <p className="text-xs text-slate-500">No active rules. Add one to see alerts.</p>}
+          {rules.map(rule => (
+            <div key={rule.id} className="flex justify-between items-center text-xs bg-slate-800 p-2 rounded border border-slate-700">
+              <span className="truncate pr-2">
+                <span className="font-bold text-blue-400">{rule.ticker === '*' ? 'ANY TICKER' : rule.ticker.toUpperCase()}</span>
+                {rule.keyword && <span> + "{rule.keyword}"</span>}
+              </span>
+              <button 
+                onClick={() => setRules(prev => prev.filter(r => r.id !== rule.id))}
+                className="text-slate-400 hover:text-red-400 p-1 flex-shrink-0"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* 
         Container for Toasts 

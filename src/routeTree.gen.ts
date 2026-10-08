@@ -23,7 +23,6 @@ import { Route as ProtectedBillingRouteImport } from './routes/_protected/billin
 import { Route as ProtectedIpoRouteImport } from './routes/_protected/ipo'
 import { Route as ProtectedPreferencesRouteImport } from './routes/_protected/preferences'
 import { Route as ProtectedProfileRouteImport } from './routes/_protected/profile'
-import { Route as ProtectedProjectsRouteImport } from './routes/_protected/projects'
 import { Route as ProtectedResearchRouteImport } from './routes/_protected/research'
 import { Route as ProtectedValuationRouteImport } from './routes/_protected/valuation'
 import { Route as ProtectedWatchlistRouteImport } from './routes/_protected/watchlist'
@@ -111,11 +110,6 @@ const ProtectedPreferencesRoute = ProtectedPreferencesRouteImport.update({
 const ProtectedProfileRoute = ProtectedProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
-  getParentRoute: () => ProtectedRoute,
-} as any)
-const ProtectedProjectsRoute = ProtectedProjectsRouteImport.update({
-  id: '/projects',
-  path: '/projects',
   getParentRoute: () => ProtectedRoute,
 } as any)
 const ProtectedResearchRoute = ProtectedResearchRouteImport.update({
@@ -236,7 +230,6 @@ export interface FileRoutesByFullPath {
   '/ipo': typeof ProtectedIpoRoute
   '/preferences': typeof ProtectedPreferencesRoute
   '/profile': typeof ProtectedProfileRoute
-  '/projects': typeof ProtectedProjectsRoute
   '/research': typeof ProtectedResearchRoute
   '/valuation': typeof ProtectedValuationRoute
   '/watchlist': typeof ProtectedWatchlistRoute
@@ -271,7 +264,6 @@ export interface FileRoutesByTo {
   '/ipo': typeof ProtectedIpoRoute
   '/preferences': typeof ProtectedPreferencesRoute
   '/profile': typeof ProtectedProfileRoute
-  '/projects': typeof ProtectedProjectsRoute
   '/research': typeof ProtectedResearchRoute
   '/valuation': typeof ProtectedValuationRoute
   '/watchlist': typeof ProtectedWatchlistRoute
@@ -309,7 +301,6 @@ export interface FileRoutesById {
   '/_protected/ipo': typeof ProtectedIpoRoute
   '/_protected/preferences': typeof ProtectedPreferencesRoute
   '/_protected/profile': typeof ProtectedProfileRoute
-  '/_protected/projects': typeof ProtectedProjectsRoute
   '/_protected/research': typeof ProtectedResearchRoute
   '/_protected/valuation': typeof ProtectedValuationRoute
   '/_protected/watchlist': typeof ProtectedWatchlistRoute
@@ -346,7 +337,6 @@ export interface FileRouteTypes {
     | '/ipo'
     | '/preferences'
     | '/profile'
-    | '/projects'
     | '/research'
     | '/valuation'
     | '/watchlist'
@@ -381,7 +371,6 @@ export interface FileRouteTypes {
     | '/ipo'
     | '/preferences'
     | '/profile'
-    | '/projects'
     | '/research'
     | '/valuation'
     | '/watchlist'
@@ -418,7 +407,6 @@ export interface FileRouteTypes {
     | '/_protected/ipo'
     | '/_protected/preferences'
     | '/_protected/profile'
-    | '/_protected/projects'
     | '/_protected/research'
     | '/_protected/valuation'
     | '/_protected/watchlist'
@@ -559,13 +547,6 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProtectedProfileRouteImport
-      parentRoute: typeof ProtectedRoute
-    }
-    '/_protected/projects': {
-      id: '/_protected/projects'
-      path: '/projects'
-      fullPath: '/projects'
-      preLoaderRoute: typeof ProtectedProjectsRouteImport
       parentRoute: typeof ProtectedRoute
     }
     '/_protected/research': {
@@ -733,7 +714,6 @@ interface ProtectedRouteChildren {
   ProtectedIpoRoute: typeof ProtectedIpoRoute
   ProtectedPreferencesRoute: typeof ProtectedPreferencesRoute
   ProtectedProfileRoute: typeof ProtectedProfileRoute
-  ProtectedProjectsRoute: typeof ProtectedProjectsRoute
   ProtectedResearchRoute: typeof ProtectedResearchRoute
   ProtectedValuationRoute: typeof ProtectedValuationRoute
   ProtectedWatchlistRoute: typeof ProtectedWatchlistRoute
@@ -751,7 +731,6 @@ const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedIpoRoute: ProtectedIpoRoute,
   ProtectedPreferencesRoute: ProtectedPreferencesRoute,
   ProtectedProfileRoute: ProtectedProfileRoute,
-  ProtectedProjectsRoute: ProtectedProjectsRoute,
   ProtectedResearchRoute: ProtectedResearchRoute,
   ProtectedValuationRoute: ProtectedValuationRoute,
   ProtectedWatchlistRoute: ProtectedWatchlistRoute,
